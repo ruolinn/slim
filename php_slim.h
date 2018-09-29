@@ -23,6 +23,9 @@
 
 #include <main/php.h>
 
+#define likely(x)       EXPECTED(x)
+#define unlikely(x)     UNEXPECTED(x)
+
 extern zend_module_entry slim_module_entry;
 #define phpext_slim_ptr &slim_module_entry
 

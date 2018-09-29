@@ -22,5 +22,6 @@ int slim_read_property(zval *result, zval *object, const char *property_name, ui
 int slim_update_property(zval *obj, const char *property_name, uint32_t property_length, zval *value);
 int slim_update_property_empty_array(zval *object, const char *property, uint32_t property_length);
 int slim_update_property_array_append(zval *object, const char *property, uint32_t property_length, zval *value);
+int slim_update_property_bool(zval *obj, const char *property_name, uint32_t property_length, int value);
 
 #endif

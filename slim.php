@@ -16,4 +16,9 @@ $router->add(['POST'], '/users', function() {
     echo "post user";
 });
 
+//$_SERVER['REQUEST_URI'] = '/users?name=wangxiaoguang';
+$_SERVER['REQUEST_URI'] = '/home?name=wangxiaoguang';
+
+$router->handle();
+
 print_r($router);

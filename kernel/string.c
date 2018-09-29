@@ -38,3 +38,42 @@ void slim_fast_explode_str_str(zval *result, const char *delimiter, unsigned int
     zend_string_release(s);
     zend_string_release(delim);
 }
+
+
+void slim_fast_explode_str(zval *result, const char *delimiter, unsigned int delimiter_length, zval *str)
+{
+    zend_string *delim;
+
+    if (unlikely(Z_TYPE_P(str) != IS_STRING)) {
+        ZVAL_NULL(result);
+        zend_error(E_WARNING, "Invalid arguments supplied for explode()");
+        return;
+    }
+
+    delim = zend_string_init(delimiter, delimiter_length, 0);
+
+    array_init(result);
+    php_explode(delim, Z_STR_P(str), result, LONG_MAX);
+    zend_string_release(delim);
+}
+
+int slim_comparestr(const zval *str, const zval *compared, zval *case_sensitive){
+
+    if (Z_TYPE_P(str) != IS_STRING || Z_TYPE_P(compared) != IS_STRING) {
+        return 0;
+    }
+
+    if (!Z_STRLEN_P(compared) || !Z_STRLEN_P(str) || Z_STRLEN_P(compared) != Z_STRLEN_P(str)) {
+        return 0;
+    }
+
+    if (Z_STRVAL_P(str) == Z_STRVAL_P(compared)) {
+        return 1;
+    }
+
+    if (!case_sensitive || !zend_is_true(case_sensitive)) {
+        return !strcmp(Z_STRVAL_P(str), Z_STRVAL_P(compared));
+    }
+
+    return !strcasecmp(Z_STRVAL_P(str), Z_STRVAL_P(compared));
+}

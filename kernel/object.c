@@ -150,3 +150,12 @@ int slim_read_property(zval *result, zval *object, const char *property_name, ui
 	return SUCCESS;
 }
 
+int slim_update_property_bool(zval *object, const char *property_name, uint32_t property_length, int value) {
+    zval v = {};
+    int ret;
+    ZVAL_BOOL(&v, value);
+    ret = slim_update_property(object, property_name, property_length, &v);
+    zval_ptr_dtor(&v);
+    return ret;
+}
+

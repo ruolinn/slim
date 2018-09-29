@@ -33,6 +33,8 @@
 #define SSL(str)   zend_string_init(SL(str), 0)
 #define SSS(str)   zend_string_init(SS(str), 0)
 
+zval* slim_get_global_str(const char *global, unsigned int global_length);
+
 int slim_fetch_parameters(int num_args, int required_args, int optional_args, ...);
 
 #define slim_fetch_params(memory_grow, required_params, optional_params, ...) \
@@ -69,5 +71,9 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
     if (FAILURE == what) {                      \
         return;                                 \
     }
+
+#define RETURN_MEMBER(object, member_name)                              \
+    slim_read_property(return_value, object, SL(member_name), PH_COPY); \
+    return;
 
 #endif

@@ -5,9 +5,11 @@
 zend_class_entry *slim_router_route_ce;
 
 PHP_METHOD(Slim_Router_Route, __construct);
+PHP_METHOD(Slim_Router_Route, getCompiledPattern);
 
 static const zend_function_entry slim_router_route_method_entry[] = {
     PHP_ME(Slim_Router_Route, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
+    PHP_ME(Slim_Router_Route, getCompiledPattern, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 
@@ -39,4 +41,9 @@ PHP_METHOD(Slim_Router_Route, __construct)
     slim_update_property(getThis(), SL("_compiledPattern"), &compiled_pattern);
     zval_ptr_dtor(&compiled_pattern);
 
+}
+
+PHP_METHOD(Slim_Router_Route, getCompiledPattern)
+{
+    RETURN_MEMBER(getThis(), "_compiledPattern");
 }

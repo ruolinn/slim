@@ -44,3 +44,25 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
 
     return SUCCESS;
 }
+
+
+zval* slim_get_global_str(const char *global, unsigned int global_length) {
+
+    if (PG(auto_globals_jit)) {
+        zend_is_auto_global_str((char *)global, global_length);
+    }
+
+    if (&EG(symbol_table)) {
+        zval *gv;
+        if ((gv = zend_hash_str_find(&EG(symbol_table), global, global_length)) != NULL) {
+            if (EXPECTED(Z_TYPE_P(gv) == IS_REFERENCE)) {
+                gv = Z_REFVAL_P(gv);
+            }
+            if (Z_TYPE_P(gv) == IS_ARRAY) {
+                return gv;
+            }
+        }
+    }
+
+    return &SLIM_G(z_null);
+}
