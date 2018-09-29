@@ -6,4 +6,14 @@ if(!extension_loaded('slim')) {
 }
 
 $router = new Slim\Router;
+//$route = new Slim\Router\Route;
+
+$router->add(['GET'], '/home', function() {
+    echo 'hello, slim';
+});
+
+$router->add(['POST'], '/users', function() {
+    echo "post user";
+});
+
 print_r($router);

@@ -11,7 +11,7 @@ void slim_init_interned_strings()
 {
     slim_interned_static = SSL("static");
     slim_interned_self = SSL("self");
-    slim_interned_parent("parent");
+    slim_interned_parent= SSL("parent");
 }
 
 

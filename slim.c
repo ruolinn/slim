@@ -27,11 +27,15 @@
 #include "ext/standard/info.h"
 #include "php_slim.h"
 
+#include "kernel/main.h"
+#include "kernel/memory.h"
+
+#include "interned-strings.h"
+
 #include "slim.h"
 
-/* If you declare any globals in php_slim.h uncomment this:
+
 ZEND_DECLARE_MODULE_GLOBALS(slim)
-*/
 
 /* True global resources - no need for thread safety here */
 static int le_slim;
@@ -95,6 +99,7 @@ PHP_MINIT_FUNCTION(slim)
 	*/
 
     SLIM_INIT(Slim_Router);
+    SLIM_INIT(Slim_Router_Route);
 
 	return SUCCESS;
 }
@@ -116,7 +121,11 @@ PHP_MSHUTDOWN_FUNCTION(slim)
  */
 PHP_RINIT_FUNCTION(slim)
 {
-    phalcon_init_interned_strings();
+    zend_slim_globals *slim_globals_ptr = ZEND_MODULE_GLOBALS_BULK(slim);
+
+    slim_init_interned_strings();
+    slim_initialize_memory(slim_globals_ptr);
+
 #if defined(COMPILE_DL_SLIM) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
@@ -129,7 +138,7 @@ PHP_RINIT_FUNCTION(slim)
  */
 PHP_RSHUTDOWN_FUNCTION(slim)
 {
-    phalcon_release_interned_strings();
+    slim_release_interned_strings();
 	return SUCCESS;
 }
 /* }}} */

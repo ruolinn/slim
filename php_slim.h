@@ -41,15 +41,19 @@ extern zend_module_entry slim_module_entry;
 #include "TSRM.h"
 #endif
 
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
 ZEND_BEGIN_MODULE_GLOBALS(slim)
-	zend_long  global_value;
-	char *global_string;
+    int initialized;
+
+    zval z_null;
+    zval z_true;
+    zval z_false;
+    zval z_zero;
+    zval z_one;
+    zval z_two;
 ZEND_END_MODULE_GLOBALS(slim)
-*/
+
+ZEND_EXTERN_MODULE_GLOBALS(slim)
+
 
 /* Always refer to the globals in your function as SLIM_G(variable).
    You are encouraged to rename these macros something shorter, see

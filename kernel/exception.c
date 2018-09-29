@@ -1,5 +1,5 @@
 #include "kernel/exception.h"
-
+#include "kernel/fcall.h"
 #include "kernel/main.h"
 
 void slim_throw_exception_format(zend_class_entry *ce, const char *format, ...) {
