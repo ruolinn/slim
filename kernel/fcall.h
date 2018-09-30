@@ -35,6 +35,7 @@ static inline int slim_call_method(zval *retval, zval *object, const char *metho
 #endif
 
 #define SLIM_CALL_METHOD(retval, object, method, ...) SLIM_CALL_METHOD_WITH_PARAMS(retval, object, Z_OBJCE_P(object), slim_fcall_method, method, __VA_ARGS__)
+#define SLIM_CALL_SELF(retval, method, ...) SLIM_CALL_METHOD_WITH_PARAMS(retval, NULL, NULL, slim_fcall_self, method, __VA_ARGS__)
 
 #define SLIM_CALL_METHOD_WITH_PARAMS(retval, obj, obj_ce, call_type, method, ...) \
     do {                                                                \

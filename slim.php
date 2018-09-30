@@ -7,9 +7,6 @@ if(!extension_loaded('slim')) {
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 
-$app->set('router', Slim\Router::class);
-
-
 $router = $app->get('router');
 
 print_r($router);exit;

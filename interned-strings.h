@@ -4,6 +4,7 @@
 extern zend_string *slim_interned_static;
 extern zend_string *slim_interned_self;
 extern zend_string *slim_interned_parent;
+extern zend_string *slim_interned_router;
 
 void slim_init_interned_strings();
 void slim_release_interned_strings();

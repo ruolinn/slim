@@ -3,14 +3,17 @@
 #include "router.h"
 #include "kernel/main.h"
 #include "kernel/fcall.h"
+#include "interned-strings.h"
 
 zend_class_entry *slim_app_ce;
 
 PHP_METHOD(Slim_App, __construct);
+PHP_METHOD(Slim_App, bootstrapContainer);
 PHP_METHOD(Slim_App, handle);
 
 static const zend_function_entry slim_app_method_entry[] = {
     PHP_ME(Slim_App, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
+    PHP_ME(Slim_App, bootstrapContainer, NULL, ZEND_ACC_PROTECTED)
     PHP_ME(Slim_App, handle, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
@@ -26,13 +29,17 @@ SLIM_INIT_CLASS(Slim_App)
 
 PHP_METHOD(Slim_App, __construct)
 {
-    zval *container = NULL;
+    SLIM_CALL_SELF(NULL, "bootstrapcontainer");
+}
 
-    slim_fetch_params(0, 0, 1, &container);
+PHP_METHOD(Slim_App, bootstrapContainer)
+{
+    zval servicename = {}, definition = {};
 
-    if (container && Z_TYPE_P(container) == IS_OBJECT) {
-
-    }
+    ZVAL_STR(&servicename, IS(router));
+    ZVAL_STRING(&definition, "Slim\\Router");
+    SLIM_CALL_SELF(NULL, "set", &servicename, &definition, &SLIM_G(z_true));
+    zval_ptr_dtor(&definition);
 }
 
 PHP_METHOD(Slim_App, handle)
