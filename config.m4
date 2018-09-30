@@ -60,8 +60,13 @@ if test "$PHP_SLIM" != "no"; then
   dnl PHP_SUBST(SLIM_SHARED_LIBADD)
 
   slim_sources="slim.c \
+app.c \
+container.c \
+container/service.c \
+container/exception.c \
 router.c \
 router/route.c \
+exception.c \
 interned-strings.c \
 kernel/object.c \
 kernel/main.c \

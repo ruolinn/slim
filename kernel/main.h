@@ -33,6 +33,14 @@
 #define SSL(str)   zend_string_init(SL(str), 0)
 #define SSS(str)   zend_string_init(SS(str), 0)
 
+#define SLIM_ENSURE_IS_STRING(pzv)    convert_to_string_ex(pzv)
+#define SLIM_ENSURE_IS_LONG(pzv)      convert_to_long_ex(pzv)
+#define SLIM_ENSURE_IS_DOUBLE(pzv)    convert_to_double_ex(pzv)
+#define SLIM_ENSURE_IS_BOOL(pzv)      convert_to_boolean_ex(pzv)
+#define SLIM_ENSURE_IS_ARRAY(pzv)     convert_to_array_ex(pzv)
+#define SLIM_ENSURE_IS_OBJECT(pzv)    convert_to_object_ex(pzv)
+#define SLIM_ENSURE_IS_NULL(pzv)      convert_to_null_ex(pzv)
+
 zval* slim_get_global_str(const char *global, unsigned int global_length);
 
 int slim_fetch_parameters(int num_args, int required_args, int optional_args, ...);
@@ -74,6 +82,11 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
 
 #define RETURN_MEMBER(object, member_name)                              \
     slim_read_property(return_value, object, SL(member_name), PH_COPY); \
+    return;
+
+#define RETURN_CTOR(var) {                      \
+        RETVAL_ZVAL(var, 1, 0);                 \
+    }                                           \
     return;
 
 #endif

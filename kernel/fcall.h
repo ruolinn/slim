@@ -13,6 +13,15 @@ typedef enum _slim_call_type {
     slim_fcall_function
 } slim_call_type;
 
+int slim_has_constructor_ce(const zend_class_entry *ce);
+
+int slim_call_method_with_params(zval *retval, zval *object, zend_class_entry *ce, slim_call_type type, const char *method_name, uint method_len, uint param_count, zval *params[]);
+
+static inline int slim_call_method(zval *retval, zval *object, const char *method, uint nparams, zval **params)
+{
+    return slim_call_method_with_params(retval, object, Z_OBJCE_P(object), slim_fcall_method, method, strlen(method), nparams, params);
+}
+
 #define SLIM_FUNC_STRLEN(x) (__builtin_constant_p(x) ? (sizeof(x)-1) : strlen(x))
 
 #if defined(_MSC_VER)
@@ -33,7 +42,7 @@ typedef enum _slim_call_type {
         RETURN_ON_FAILURE(slim_call_method_with_params(retval, obj, obj_ce, call_type, method, SLIM_FUNC_STRLEN(method), SLIM_CALL_NUM_PARAMS(params_), SLIM_PASS_CALL_PARAMS(params_))); \
     } while (0)
 
-int slim_call_method_with_params(zval *retval, zval *object, zend_class_entry *ce, slim_call_type type, const char *method_name, uint method_len, uint param_count, zval *params[]);
+
 
 
 #endif

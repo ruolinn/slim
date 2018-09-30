@@ -98,8 +98,13 @@ PHP_MINIT_FUNCTION(slim)
 	REGISTER_INI_ENTRIES();
 	*/
 
+    SLIM_INIT(Slim_App);
+    SLIM_INIT(Slim_Container);
+    SLIM_INIT(Slim_Container_Service);
+    SLIM_INIT(Slim_Container_Exception);
     SLIM_INIT(Slim_Router);
     SLIM_INIT(Slim_Router_Route);
+    SLIM_INIT(Slim_Exception);
 
 	return SUCCESS;
 }

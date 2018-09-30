@@ -22,3 +22,9 @@ void slim_throw_exception_format(zend_class_entry *ce, const char *format, ...) 
     zend_throw_exception_object(&object);
     zval_dtor(&msg);
 }
+
+
+void slim_throw_exception_string(zend_class_entry *ce, const char *message){
+
+    zend_throw_exception_ex(ce, 0, "%s", message);
+}

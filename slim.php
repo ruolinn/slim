@@ -5,8 +5,23 @@ if(!extension_loaded('slim')) {
 	dl('slim.' . PHP_SHLIB_SUFFIX);
 }
 
-$router = new Slim\Router;
-//$route = new Slim\Router\Route;
+class User
+{
+
+}
+
+
+$container = new Slim\Container;
+$container->set('router', Slim\Router::class);
+
+
+$router = $container->get('router');
+$not = $container->get(User::class);
+
+print_r($not);exit;
+
+//$app = new Slim\App;
+//print_r($app->handle());exit;
 
 $router->add(['GET'], '/home', function() {
     echo 'hello, slim';

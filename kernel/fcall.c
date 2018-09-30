@@ -10,6 +10,19 @@
 
 #include "interned-strings.h"
 
+int slim_has_constructor_ce(const zend_class_entry *ce)
+{
+    while (ce) {
+        if (ce->constructor) {
+            return 1;
+        }
+
+        ce = ce->parent;
+    }
+
+    return 0;
+}
+
 int slim_call_method_with_params(zval *retval, zval *object, zend_class_entry *ce, slim_call_type type, const char *method_name, uint method_len, uint param_count, zval *params[])
 {
 	zval func_name = {}, ret = {}, *retval_ptr = (retval != NULL) ? retval : &ret, obj = {};

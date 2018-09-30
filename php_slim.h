@@ -26,6 +26,24 @@
 #define likely(x)       EXPECTED(x)
 #define unlikely(x)     UNEXPECTED(x)
 
+#if defined(__GNUC__) || defined(__clang__)
+#	define SLIM_ATTR_NONNULL            __attribute__((nonnull))
+#	define SLIM_ATTR_NONNULL1(x)        __attribute__((nonnull (x)))
+#	define SLIM_ATTR_NONNULL2(x, y)     __attribute__((nonnull (x, y)))
+#	define SLIM_ATTR_NONNULL3(x, y, z)  __attribute__((nonnull (x, y, z)))
+#	define SLIM_ATTR_PURE               __attribute__((pure))
+#	define SLIM_ATTR_CONST              __attribute__((const))
+#	define SLIM_ATTR_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#	define SLIM_ATTR_NONNULL
+#	define SLIM_ATTR_NONNULL1(x)
+#	define SLIM_ATTR_NONNULL2(x, y)
+#	define SLIM_ATTR_NONNULL3(x, y, z)
+#	define SLIM_ATTR_PURE
+#	define SLIM_ATTR_CONST
+#	define SLIM_ATTR_WARN_UNUSED_RESULT
+#endif
+
 extern zend_module_entry slim_module_entry;
 #define phpext_slim_ptr &slim_module_entry
 
