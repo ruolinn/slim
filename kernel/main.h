@@ -69,7 +69,7 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
         INIT_NS_CLASS_ENTRY(ce, #ns, #class_name, methods);             \
         slim_ ##lcname## _ce = zend_register_internal_class_ex(&ce, parent_ce); \
         if (!slim_ ##lcname## _ce) {                                 \
-            fprintf(stderr, "Phalcon Error: Class to extend '%s' was not found when registering class '%s'\n", (parent_ce ? parent_ce->name->val : "(null)"), ZEND_NS_NAME(#ns, #class_name)); \
+            fprintf(stderr, "Slim Error: Class to extend '%s' was not found when registering class '%s'\n", (parent_ce ? parent_ce->name->val : "(null)"), ZEND_NS_NAME(#ns, #class_name)); \
             return FAILURE;                                             \
         }                                                               \
         slim_ ##lcname## _ce->ce_flags |= flags;                     \

@@ -5,20 +5,14 @@ if(!extension_loaded('slim')) {
 	dl('slim.' . PHP_SHLIB_SUFFIX);
 }
 
-class User
-{
+$app = new Slim\App;//print_r(get_parent_class($app));exit;
 
-}
-
-
-$container = new Slim\Container;
-$container->set('router', Slim\Router::class);
+$app->set('router', Slim\Router::class);
 
 
-$router = $container->get('router');
-$not = $container->get(User::class);
+$router = $app->get('router');
 
-print_r($not);exit;
+print_r($router);exit;
 
 //$app = new Slim\App;
 //print_r($app->handle());exit;

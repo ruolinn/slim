@@ -1,4 +1,5 @@
 #include "app.h"
+#include "container.h"
 #include "router.h"
 #include "kernel/main.h"
 #include "kernel/fcall.h"
@@ -16,9 +17,9 @@ static const zend_function_entry slim_app_method_entry[] = {
 
 SLIM_INIT_CLASS(Slim_App)
 {
-    SLIM_REGISTER_CLASS(Slim, App, app, slim_app_method_entry, 0);
+    SLIM_REGISTER_CLASS_EX(Slim, App, app, slim_container_ce, slim_app_method_entry, 0);
 
-    zend_declare_property_null(slim_app_ce, SL("container"), ZEND_ACC_PROTECTED);
+    //zend_declare_property_null(slim_app_ce, SL("container"), ZEND_ACC_PROTECTED);
 
     return SUCCESS;
 }
