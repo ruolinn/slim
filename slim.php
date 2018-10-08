@@ -7,12 +7,7 @@ if(!extension_loaded('slim')) {
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 
-$router = $app->get('router');
-
-print_r($router);exit;
-
-//$app = new Slim\App;
-//print_r($app->handle());exit;
+$router = $app->getShared('router');
 
 $router->add(['GET'], '/home', function() {
     echo 'hello, slim';
@@ -25,6 +20,8 @@ $router->add(['POST'], '/users', function() {
 //$_SERVER['REQUEST_URI'] = '/users?name=wangxiaoguang';
 $_SERVER['REQUEST_URI'] = '/home?name=wangxiaoguang';
 
-$router->handle();
+$app->handle();
+
+$router = $app->getShared('router');
 
 print_r($router);

@@ -10,10 +10,14 @@ zend_class_entry *slim_container_ce;
 
 PHP_METHOD(Slim_Container, set);
 PHP_METHOD(Slim_Container, get);
+PHP_METHOD(Slim_Container, setShared);
+PHP_METHOD(Slim_Container, getShared);
 
 static const zend_function_entry slim_container_method_entry[] = {
     PHP_ME(Slim_Container, set, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Container, get, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_Container, setShared, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_Container, getShared, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 
@@ -72,4 +76,37 @@ PHP_METHOD(Slim_Container, get)
     }
 }
 
+PHP_METHOD(Slim_Container, setShared)
+{
+    zval *name, *definition;
+
+    slim_fetch_params(0, 2, 0, &name, &definition);
+
+    SLIM_CALL_METHOD(return_value, getThis(), "set", name, definition, &SLIM_G(z_true));
+}
+
+PHP_METHOD(Slim_Container, getShared)
+{
+    zval *name, *parameters = NULL, *noerror = NULL;
+
+    slim_fetch_params(0, 1, 2, &name, &parameters, &noerror);
+
+    if (!parameters) {
+        parameters = &SLIM_G(z_null);
+    }
+
+    if (!noerror) {
+        noerror = &SLIM_G(z_null);
+    }
+
+    if (slim_property_array_isset_fetch(return_value, getThis(), SL("_sharedInstances"), name, PH_COPY)) {
+        slim_update_property_bool(getThis(), SL("_freshInstance"), 0);
+    } else {
+        SLIM_CALL_SELF(return_value, "get", name, parameters, noerror);
+        if (zend_is_true(return_value)) {
+            slim_update_property_bool(getThis(), SL("_freshInstance"), 1);
+            slim_update_property_array(getThis(), SL("_sharedInstances"), name, return_value);
+        }
+    }
+}
 
