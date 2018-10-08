@@ -13,12 +13,14 @@ zend_class_entry *slim_router_ce;
 
 PHP_METHOD(Slim_Router, __construct);
 PHP_METHOD(Slim_Router, add);
+PHP_METHOD(Slim_Router, getMatchedRoute);
 PHP_METHOD(Slim_Router, handle);
 PHP_METHOD(Slim_Router, getPathInfo);
 
 static const zend_function_entry slim_router_method_entry[] = {
     PHP_ME(Slim_Router, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
     PHP_ME(Slim_Router, add, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Router, getMatchedRoute, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Router, handle, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Router, getPathInfo, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
@@ -132,4 +134,10 @@ PHP_METHOD(Slim_Router, getPathInfo)
     }
 
     RETURN_STRING("/");
+}
+
+
+PHP_METHOD(Slim_Router, getMatchedRoute)
+{
+	RETURN_MEMBER(getThis(), "_matchedRoute");
 }

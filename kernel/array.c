@@ -192,3 +192,26 @@ int ZEND_FASTCALL slim_array_unset(zval *arr, const zval *index, int flags) {
         return 0;
     }
 }
+
+int slim_array_update_long(zval *arr, ulong index, zval *value, int flags)
+{
+	zval new_value = {};
+
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		return FAILURE;
+	}
+
+	if ((flags & PH_CTOR) == PH_CTOR) {
+		ZVAL_DUP(&new_value, value);
+		value = &new_value;
+	} else if ((flags & PH_COPY) == PH_COPY) {
+		Z_TRY_ADDREF_P(value);
+	}
+
+	if ((flags & PH_SEPARATE) == PH_SEPARATE) {
+		SEPARATE_ZVAL_IF_NOT_REF(arr);
+	}
+
+	return zend_hash_index_update(Z_ARRVAL_P(arr), index, value) ? SUCCESS : FAILURE;
+}

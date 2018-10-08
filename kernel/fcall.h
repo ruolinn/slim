@@ -4,6 +4,9 @@
 #include "php_slim.h"
 #include "kernel/main.h"
 
+#include <Zend/zend_hash.h>
+#include <Zend/zend.h>
+
 typedef enum _slim_call_type {
     slim_fcall_parent,
     slim_fcall_self,
@@ -16,6 +19,7 @@ typedef enum _slim_call_type {
 int slim_has_constructor_ce(const zend_class_entry *ce);
 
 int slim_call_method_with_params(zval *retval, zval *object, zend_class_entry *ce, slim_call_type type, const char *method_name, uint method_len, uint param_count, zval *params[]);
+int slim_call_user_func_array(zval *retval, zval *handler, zval *params);
 
 static inline int slim_call_method(zval *retval, zval *object, const char *method, uint nparams, zval **params)
 {
@@ -43,7 +47,10 @@ static inline int slim_call_method(zval *retval, zval *object, const char *metho
         RETURN_ON_FAILURE(slim_call_method_with_params(retval, obj, obj_ce, call_type, method, SLIM_FUNC_STRLEN(method), SLIM_CALL_NUM_PARAMS(params_), SLIM_PASS_CALL_PARAMS(params_))); \
     } while (0)
 
-
+#define SLIM_CALL_USER_FUNC_ARRAY(retval, handler, params)			\
+	do {																\
+		RETURN_ON_FAILURE(slim_call_user_func_array(retval, handler, params)); \
+	} while (0)
 
 
 #endif

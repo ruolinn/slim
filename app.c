@@ -1,9 +1,16 @@
+
 #include "app.h"
 #include "container.h"
 #include "router.h"
+
+#include <Zend/zend_closures.h>
+
 #include "kernel/main.h"
 #include "kernel/fcall.h"
+#include "kernel/string.h"
 #include "interned-strings.h"
+
+
 
 zend_class_entry *slim_app_ce;
 
@@ -42,7 +49,8 @@ PHP_METHOD(Slim_App, bootstrapContainer)
 
 PHP_METHOD(Slim_App, handle)
 {
-    zval *uri = NULL, service = {}, router = {};
+    zval *uri = NULL, service = {}, router = {}, callable = {}, route = {}, parts = {};
+	zval route_paths;
 
     slim_fetch_params(0, 0, 1, &uri);
 
@@ -54,4 +62,16 @@ PHP_METHOD(Slim_App, handle)
     SLIM_CALL_SELF(&router, "getshared", &service);
 
     SLIM_CALL_METHOD(NULL, &router, "handle", uri);
+
+	SLIM_CALL_METHOD(&route, &router, "getmatchedroute");
+	SLIM_CALL_METHOD(&callable, &route, "getCallable");
+
+	if (Z_TYPE(callable) == IS_OBJECT) {
+		if (instanceof_function(Z_OBJCE(callable), zend_ce_closure)) {
+			SLIM_CALL_USER_FUNC_ARRAY(return_value, &callable, NULL);
+		}
+	} else if (Z_TYPE(callable) == IS_STRING) {
+		slim_fast_explode_str(&parts, SL("::"), &callable);
+		SLIM_CALL_USER_FUNC_ARRAY(return_value, &parts, NULL);
+	}
 }
