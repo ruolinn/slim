@@ -4,6 +4,20 @@
 #include "kernel/exception.h"
 
 #include <ext/spl/spl_exceptions.h>
+#include <Zend/zend_interfaces.h>
+#include <Zend/zend_inheritance.h>
+
+zend_class_entry *slim_register_internal_interface_ex(zend_class_entry *orig_ce, zend_class_entry *parent_ce) {
+
+    zend_class_entry *ce;
+
+    ce = zend_register_internal_interface(orig_ce);
+    if (parent_ce) {
+        zend_do_inheritance(ce, parent_ce);
+    }
+
+    return ce;
+}
 
 int slim_fetch_parameters(int num_args, int required_args, int optional_args, ...)
 {

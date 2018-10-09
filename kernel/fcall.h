@@ -53,4 +53,13 @@ static inline int slim_call_method(zval *retval, zval *object, const char *metho
 	} while (0)
 
 
+#define SLIM_CALL_METHOD_WITH_FLAG(flag, retval, obj, obj_ce, call_type, method, ...) \
+    do {                                                                \
+        zval *params_[] = {SLIM_FETCH_VA_ARGS __VA_ARGS__};          \
+        flag = slim_call_method_with_params(retval, obj, obj_ce, call_type, method, SLIM_FUNC_STRLEN(method), SLIM_CALL_NUM_PARAMS(params_), SLIM_PASS_CALL_PARAMS(params_)); \
+    } while (0)
+
+
+#define SLIM_CALL_FUNCTION_FLAG(flag, retval, method, ...) SLIM_CALL_METHOD_WITH_FLAG(flag, retval, NULL, NULL, slim_fcall_function, method, __VA_ARGS__)
+
 #endif

@@ -107,6 +107,10 @@ static inline void trace(const char *file, int line, const char* function, const
     va_end(args);
 }
 
+# if defined(HAVE_JSON) && !defined(SLIM_USE_PHP_JSON)
+#    define SLIM_USE_PHP_JSON 1
+# endif
+
 #endif	/* PHP_SLIM_H */
 
 

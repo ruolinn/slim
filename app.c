@@ -2,12 +2,15 @@
 #include "app.h"
 #include "container.h"
 #include "router.h"
+#include "http/response.h"
+#include "http/responseinterface.h"
 
 #include <Zend/zend_closures.h>
 
 #include "kernel/main.h"
 #include "kernel/fcall.h"
 #include "kernel/string.h"
+#include "kernel/operators.h"
 #include "interned-strings.h"
 
 
@@ -45,12 +48,17 @@ PHP_METHOD(Slim_App, bootstrapContainer)
     ZVAL_STRING(&definition, "Slim\\Router");
     SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
     zval_ptr_dtor(&definition);
+
+    ZVAL_STR(&service, IS(response));
+    ZVAL_STRING(&definition, "Slim\\Http\\Response");
+    SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
+    zval_ptr_dtor(&definition);
 }
 
 PHP_METHOD(Slim_App, handle)
 {
     zval *uri = NULL, service = {}, router = {}, callable = {}, route = {}, parts = {};
-	zval route_paths;
+    zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
 
     slim_fetch_params(0, 0, 1, &uri);
 
@@ -68,10 +76,34 @@ PHP_METHOD(Slim_App, handle)
 
 	if (Z_TYPE(callable) == IS_OBJECT) {
 		if (instanceof_function(Z_OBJCE(callable), zend_ce_closure)) {
-			SLIM_CALL_USER_FUNC_ARRAY(return_value, &callable, NULL);
+			SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &callable, NULL);
 		}
 	} else if (Z_TYPE(callable) == IS_STRING) {
 		slim_fast_explode_str(&parts, SL("::"), &callable);
-		SLIM_CALL_USER_FUNC_ARRAY(return_value, &parts, NULL);
+		SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &parts, NULL);
 	}
+
+  if (Z_TYPE(possible_response) == IS_OBJECT && instanceof_function_ex(Z_OBJCE(possible_response), slim_http_responseinterface_ce, 1)) {
+      ZVAL_COPY_VALUE(&response, &possible_response);
+      ZVAL_TRUE(&returned_response);
+  } else {
+      ZVAL_STR(&service, IS(response));
+      SLIM_CALL_METHOD(&response, getThis(), "getshared", &service);
+
+      ZVAL_FALSE(&returned_response);
+  }
+
+  if (SLIM_IS_FALSE(&returned_response)) {
+      if (Z_TYPE(possible_response) == IS_STRING) {
+          SLIM_CALL_METHOD(NULL, &response, "setcontent", &possible_response);
+      } else if (Z_TYPE(possible_response) == IS_ARRAY) {
+          SLIM_CALL_METHOD(NULL, &response, "setjsoncontent", &possible_response);
+      }
+  }
+
+  SLIM_CALL_METHOD(&returned_response_sent, &response, "issent");
+
+  if (SLIM_IS_FALSE(&returned_response_sent)) {
+      SLIM_CALL_METHOD(NULL, &response, "send");
+  }
 }

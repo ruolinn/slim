@@ -41,6 +41,8 @@
 #define SLIM_ENSURE_IS_OBJECT(pzv)    convert_to_object_ex(pzv)
 #define SLIM_ENSURE_IS_NULL(pzv)      convert_to_null_ex(pzv)
 
+zend_class_entry *slim_register_internal_interface_ex(zend_class_entry *orig_ce, zend_class_entry *parent_ce);
+
 zval* slim_get_global_str(const char *global, unsigned int global_length);
 
 int slim_fetch_parameters(int num_args, int required_args, int optional_args, ...);
@@ -53,6 +55,24 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
         array_init(&slim_memory_entry); \
     } else { \
         ZVAL_NULL(&slim_memory_entry); \
+    }
+
+#define SLIM_REGISTER_INTERFACE(ns, classname, name, methods)        \
+    {                                                                   \
+        zend_class_entry ce;                                            \
+        INIT_NS_CLASS_ENTRY(ce, #ns, #classname, methods);              \
+        slim_ ##name## _ce = zend_register_internal_interface(&ce);  \
+    }
+
+#define SLIM_REGISTER_INTERFACE_EX(ns, classname, lcname, parent_ce, methods) \
+    {                                                                   \
+        zend_class_entry ce;                                            \
+        INIT_NS_CLASS_ENTRY(ce, #ns, #classname, methods);              \
+        slim_ ##lcname## _ce = phalcon_register_internal_interface_ex(&ce, parent_ce); \
+        if (!phalcon_ ##lcname## _ce) {                                 \
+            fprintf(stderr, "Can't register interface %s with parent %s\n", ZEND_NS_NAME(#ns, #classname), (parent_ce ? parent_ce->name->val : "(null)")); \
+            return FAILURE;                                             \
+        }                                                               \
     }
 
 #define SLIM_REGISTER_CLASS(ns, class_name, name, methods, flags)  \
@@ -79,6 +99,11 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
     if (FAILURE == what) {                      \
         return;                                 \
     }
+
+#define RETURN_THIS() {                         \
+        RETVAL_ZVAL(getThis(), 1, 0);           \
+    }                                           \
+        return;
 
 #define RETURN_MEMBER(object, member_name)                              \
     slim_read_property(return_value, object, SL(member_name), PH_COPY); \

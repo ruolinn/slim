@@ -17,6 +17,10 @@
 #include <ext/date/php_date.h>
 #include <ext/pcre/php_pcre.h>
 
+#ifdef SLIM_USE_PHP_JSON
+#include <ext/json/php_json.h>
+#endif
+
 int slim_memnstr_str_str(const char *haystack, unsigned int haystack_length, char *needle, unsigned int needle_length) {
 
     if (haystack && haystack_length >= needle_length) {
@@ -76,4 +80,41 @@ int slim_comparestr(const zval *str, const zval *compared, zval *case_sensitive)
     }
 
     return !strcasecmp(Z_STRVAL_P(str), Z_STRVAL_P(compared));
+}
+
+int slim_json_encode(zval *retval, zval *v, int opts)
+{
+    int flag;
+
+#ifdef SLIM_USE_PHP_JSON
+    smart_str buf = {0};
+# if PHP_VERSION_ID >= 70100
+    flag = php_json_encode(&buf, v, opts);
+# else
+    JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+    php_json_encode(&buf, v, opts);
+    if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(opts & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+        flag = FAILURE;
+    } else {
+        flag = SUCCESS;
+    }
+# endif
+    if (flag == SUCCESS) {
+        smart_str_0(&buf); /* copy? */
+        if (buf.s) {
+            ZVAL_NEW_STR(retval, buf.s);
+            return flag;
+        }
+        ZVAL_EMPTY_STRING(retval);
+        return flag;
+    } else {
+        smart_str_free(&buf);
+        ZVAL_FALSE(retval);
+    }
+#else
+    zval zopts = {};
+    ZVAL_LONG(&zopts, opts);
+    SLIM_CALL_FUNCTION_FLAG(flag, retval, "json_encode", v, &zopts);
+#endif
+    return flag;
 }

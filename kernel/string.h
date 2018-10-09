@@ -9,4 +9,7 @@ void slim_fast_explode_str_str(zval *result, const char *delimiter, unsigned int
 
 int slim_comparestr(const zval *str, const zval *compared, zval *case_sensitive);
 
+int slim_json_encode(zval *return_value, zval *v, int opts);
+int slim_json_decode(zval *return_value, zval *v, zend_bool assoc);
+
 #endif
