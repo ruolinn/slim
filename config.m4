@@ -66,6 +66,7 @@ container/service.c \
 container/exception.c \
 router.c \
 router/route.c \
+http/request.c \
 http/response.c \
 http/response/exception.c \
 http/responseinterface.c \

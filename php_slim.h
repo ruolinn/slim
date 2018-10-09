@@ -26,6 +26,14 @@
 #define likely(x)       EXPECTED(x)
 #define unlikely(x)     UNEXPECTED(x)
 
+#if defined(__GNUC__) && (defined(__clang__) || ((__GNUC__ * 100 + __GNUC_MINOR__) >= 405))
+#	define UNREACHABLE() __builtin_unreachable()
+#	define ASSUME(x)     if (x) {} else __builtin_unreachable()
+#else
+#	define UNREACHABLE() assert(0)
+#	define ASSUME(x)     assert(!!(x));
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
 #	define SLIM_ATTR_NONNULL            __attribute__((nonnull))
 #	define SLIM_ATTR_NONNULL1(x)        __attribute__((nonnull (x)))

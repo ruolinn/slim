@@ -14,10 +14,8 @@ if(!extension_loaded('slim')) {
 	dl('slim.' . PHP_SHLIB_SUFFIX);
 }
 
-//$response = new Slim\Http\Response;
-//$response->setJsonContent(['key' => 'value']);
-
-//print_r($response);exit;
+$request = new Slim\Http\Request();
+print_r($request);exit;
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 

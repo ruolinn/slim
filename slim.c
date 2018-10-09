@@ -103,6 +103,7 @@ PHP_MINIT_FUNCTION(slim)
     SLIM_INIT(Slim_App);
     SLIM_INIT(Slim_Router);
     SLIM_INIT(Slim_Router_Route);
+	SLIM_INIT(Slim_Http_Request);
     SLIM_INIT(Slim_Http_ResponseInterface);
     SLIM_INIT(Slim_Http_Response);
     SLIM_INIT(Slim_Http_Response_Exception)
