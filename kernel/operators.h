@@ -20,6 +20,11 @@
 #define SLIM_IS_FALSE(var)       (Z_TYPE_P(var) == IS_FALSE)
 #define SLIM_IS_TRUE(var)        (Z_TYPE_P(var) == IS_TRUE)
 
+#define SLIM_IS_NOT_FALSE(var)   (Z_TYPE_P(var) != IS_FALSE)
+#define SLIM_IS_NOT_TRUE(var)    (Z_TYPE_P(var) != IS_TRUE)
+#define SLIM_IS_BOOL(var)        (Z_TYPE_P(var) == IS_FALSE || Z_TYPE_P(var) == IS_TRUE)
+
+
 void slim_cast(zval *result, zval *var, uint32_t type);
 void slim_convert_to_object(zval *op);
 zend_long slim_get_intval_ex(const zval *op);

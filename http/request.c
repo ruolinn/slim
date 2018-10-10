@@ -54,45 +54,61 @@ PHP_METHOD(Slim_Http_Request, isPatch);
 PHP_METHOD(Slim_Http_Request, isHead);
 PHP_METHOD(Slim_Http_Request, isDelete);
 PHP_METHOD(Slim_Http_Request, isOptions);
+PHP_METHOD(Slim_Http_Request, hasFiles);
+PHP_METHOD(Slim_Http_Request, getUploadedFiles);
+PHP_METHOD(Slim_Http_Request, getHeaders);
+PHP_METHOD(Slim_Http_Request, getHTTPReferer);
+PHP_METHOD(Slim_Http_Request, _getQualityHeader);
+PHP_METHOD(Slim_Http_Request, _getBestQuality);
+PHP_METHOD(Slim_Http_Request, getAcceptableContent);
+PHP_METHOD(Slim_Http_Request, getBestAccept);
 
 
 static const zend_function_entry slim_http_request_method_entry[] = {
 	PHP_ME(Slim_Http_Request, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
 	PHP_ME(Slim_Http_Request, _get, NULL, ZEND_ACC_PROTECTED)
 	PHP_ME(Slim_Http_Request, get, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getPost, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getPut, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getQuery, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getServer, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getEnv, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getParam, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, has, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, hasPost, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, hasPut, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, hasQuery, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, hasServer, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, hasHeader, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getHeader, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getScheme, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, isAjax, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, isSecure, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getRawBody, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getServerAddress, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getServerName, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getHttpHost, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getClientAddress, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getMethod, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getURI, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getQueryString, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, getUserAgent, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, isMethod, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, isPost, NULL, ZEND_ACC_PUBLIC)
-  PHP_ME(Slim_Http_Request, isGet, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getPost, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getPut, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getQuery, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getServer, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getEnv, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getParam, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, has, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, hasPost, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, hasPut, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, hasQuery, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, hasServer, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, hasHeader, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getHeader, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getScheme, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, isAjax, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, isSecure, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getRawBody, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getServerAddress, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getServerName, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getHttpHost, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getClientAddress, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getMethod, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getURI, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getQueryString, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getUserAgent, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, isMethod, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, isPost, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, isGet, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isPut, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isPatch, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isHead, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isDelete, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isOptions, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, hasFiles, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getUploadedFiles, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getHeaders, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getHTTPReferer, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, _getQualityHeader, NULL, ZEND_ACC_PROTECTED)
+	PHP_ME(Slim_Http_Request, _getBestQuality, NULL, ZEND_ACC_PROTECTED)
+	PHP_ME(Slim_Http_Request, getAcceptableContent, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getBestAccept, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -772,6 +788,136 @@ PHP_METHOD(Slim_Http_Request, isOptions)
 	SLIM_CALL_METHOD(&method, getThis(), "getmethod");
 	is_equal_function(return_value, &method, &options);
 	zval_ptr_dtor(&method);
+}
+
+PHP_METHOD(Slim_Http_Request, hasFiles)
+{
+	// @ TODO 随后实现
+}
+
+PHP_METHOD(Slim_Http_Request, getUploadedFiles)
+{
+	// @ TODO 随后实现
+}
+
+PHP_METHOD(Slim_Http_Request, getHeaders)
+{
+	zval *_SERVER, *value;
+	zend_string *str_key;
+
+	array_init(return_value);
+	_SERVER = slim_get_global_str(SL("_SERVER"));
+	if (unlikely(Z_TYPE_P(_SERVER) != IS_ARRAY)) {
+		return;
+	}
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(_SERVER), str_key, value) {
+		if (str_key && ZSTR_LEN(str_key) > 5 && !memcmp(ZSTR_VAL(str_key), "HTTP_", 5)) {
+			zval header = {};
+			ZVAL_STRINGL(&header, ZSTR_VAL(str_key) + 5, ZSTR_LEN(str_key) - 5);
+			slim_array_update(return_value, &header, value, PH_COPY);
+			zval_ptr_dtor(&header);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_METHOD(Slim_Http_Request, getHTTPReferer)
+{
+	zval *_SERVER, http_referer = {};
+
+	_SERVER = slim_get_global_str(SL("_SERVER"));
+	if (slim_array_isset_fetch_str(&http_referer, _SERVER, SL("HTTP_REFERER"), PH_READONLY)) {
+		RETURN_CTOR(&http_referer);
+	}
+
+	RETURN_EMPTY_STRING();
+}
+
+PHP_METHOD(Slim_Http_Request, _getQualityHeader)
+{
+	zval *server_index, *name, quality_one = {}, http_server = {}, pattern = {}, parts = {}, *part;
+
+	slim_fetch_params(0, 2, 0, &server_index, &name);
+
+	ZVAL_DOUBLE(&quality_one, 1);
+
+	array_init(return_value);
+
+	SLIM_CALL_METHOD(&http_server, getThis(), "getserver", server_index);
+
+	ZVAL_STRING(&pattern, "/,\\s*/");
+	SLIM_CALL_FUNCTION(&parts, "preg_split", &pattern, &http_server);
+	zval_ptr_dtor(&pattern);
+	zval_ptr_dtor(&http_server);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(parts), part) {
+		zval header_parts = {}, quality_part = {}, quality = {}, qualitys = {}, header_name = {};
+		slim_fast_explode_str(&header_parts, SL(";"), part);
+		if (slim_array_isset_fetch_long(&quality_part, &header_parts, 1, PH_READONLY)) {
+			slim_substr(&quality, &quality_part, 2, 0);
+		} else {
+			ZVAL_COPY(&quality, &quality_one);
+		}
+
+		slim_array_fetch_long(&header_name, &header_parts, 0, PH_NOISY|PH_COPY);
+		zval_ptr_dtor(&header_parts);
+
+		array_init_size(&qualitys, 2);
+		slim_array_update(&qualitys, name, &header_name, 0);
+		slim_array_update_str(&qualitys, SL("quality"), &quality, 0);
+
+		slim_array_append(return_value, &qualitys, 0);
+	} ZEND_HASH_FOREACH_END();
+	zval_ptr_dtor(&parts);
+}
+
+PHP_METHOD(Slim_Http_Request, _getBestQuality)
+{
+	zval *quality_parts, *name, *accept, quality = {}, selected_name = {};
+
+	slim_fetch_params(0, 2, 0, &quality_parts, &name);
+
+	ZVAL_LONG(&quality, 0);
+	ZVAL_EMPTY_STRING(&selected_name);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(quality_parts), accept) {
+		zval accept_quality = {}, best_quality = {};
+
+		slim_array_fetch_str(&accept_quality, accept, SL("quality"), PH_NOISY|PH_READONLY);
+
+		is_smaller_function(&best_quality, &quality, &accept_quality);
+		if (SLIM_IS_TRUE(&best_quality)) {
+			ZVAL_COPY_VALUE(&quality, &accept_quality);
+			zval_ptr_dtor(&selected_name);
+			slim_array_fetch(&selected_name, accept, name, PH_NOISY|PH_COPY);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	RETVAL_ZVAL(&selected_name, 0, 0);
+}
+
+PHP_METHOD(Slim_Http_Request, getAcceptableContent)
+{
+	zval accept_header = {}, quality_index = {};
+
+	ZVAL_STRING(&accept_header, "HTTP_ACCEPT");
+	ZVAL_STRING(&quality_index, "accept");
+
+	SLIM_RETURN_CALL_METHOD(getThis(), "_getqualityheader", &accept_header, &quality_index);
+	zval_ptr_dtor(&quality_index);
+	zval_ptr_dtor(&accept_header);
+}
+
+PHP_METHOD(Slim_Http_Request, getBestAccept)
+{
+	zval quality_index = {}, acceptable_content = {};
+
+	ZVAL_STRING(&quality_index, "accept");
+
+	SLIM_CALL_METHOD(&acceptable_content, getThis(), "getacceptablecontent");
+	SLIM_RETURN_CALL_METHOD(getThis(), "_getbestquality", &acceptable_content, &quality_index);
+	zval_ptr_dtor(&quality_index);
+	zval_ptr_dtor(&acceptable_content);
 }
 
 static const char* slim_http_request_getmethod_helper()

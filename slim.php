@@ -40,7 +40,10 @@ $request = new Slim\Http\Request();
 //var_dump($request->getQueryString());exit;
 //var_dump($request->getUserAgent());exit;
 //var_dump($request->isMethod(['GET', 'POST']));
-var_dump($request->isPost());exit;
+//var_dump($request->getHeaders());exit;
+//var_dump($request->getHttpReferer());exit;
+//print_r($request->getAcceptableContent());exit;
+//print_r($request->getBestAccept());exit;
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 

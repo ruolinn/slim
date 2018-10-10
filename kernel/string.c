@@ -1,6 +1,7 @@
 #include "kernel/string.h"
 #include "kernel/main.h"
 #include "kernel/fcall.h"
+#include "kernel/operators.h"
 
 #include <ctype.h>
 
@@ -182,4 +183,44 @@ int slim_memnstr_str(const zval *haystack, char *needle, unsigned int needle_len
     }
 
     return 0;
+}
+
+void slim_substr(zval *return_value, zval *str, unsigned long from, long length)
+{
+	uint str_len;
+
+	if (Z_TYPE_P(str) != IS_STRING) {
+
+		if (Z_TYPE_P(str) == IS_NULL || SLIM_IS_BOOL(str)) {
+			ZVAL_FALSE(return_value);
+			return;
+		}
+
+		if (Z_TYPE_P(str) == IS_LONG) {
+			ZVAL_NULL(return_value);
+			return;
+		}
+
+		zend_error(E_WARNING, "Invalid arguments supplied for slim_substr()");
+		ZVAL_FALSE(return_value);
+		return;
+	}
+
+	str_len = (uint)(Z_STRLEN_P(str));
+	if (str_len < from){
+		ZVAL_FALSE(return_value);
+		return;
+	}
+
+	if (length < 0) {
+		length = str_len - from + length;
+	} else if (!length || (str_len < length + from)) {
+		length = str_len - from;
+	}
+
+	if (length){
+		ZVAL_STRINGL(return_value, Z_STRVAL_P(str) + from, length);
+	} else {
+		ZVAL_NULL(return_value);
+	}
 }

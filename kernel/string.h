@@ -24,4 +24,6 @@ int slim_comparestr(const zval *str, const zval *compared, zval *case_sensitive)
 int slim_json_encode(zval *return_value, zval *v, int opts);
 int slim_json_decode(zval *return_value, zval *v, zend_bool assoc);
 
+void slim_substr(zval *return_value, zval *str, unsigned long from, long length);
+
 #endif

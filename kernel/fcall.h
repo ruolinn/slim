@@ -63,5 +63,6 @@ static inline int slim_call_method(zval *retval, zval *object, const char *metho
 #define SLIM_CALL_FUNCTION(retval, method, ...) SLIM_CALL_METHOD_WITH_PARAMS(retval, NULL, NULL, slim_fcall_function, method, __VA_ARGS__)
 #define SLIM_CALL_FUNCTION_FLAG(flag, retval, method, ...) SLIM_CALL_METHOD_WITH_FLAG(flag, retval, NULL, NULL, slim_fcall_function, method, __VA_ARGS__)
 #define SLIM_RETURN_CALL_SELF(method, ...) SLIM_CALL_METHOD_WITH_PARAMS(return_value, NULL, NULL, slim_fcall_self, method, __VA_ARGS__)
+#define SLIM_RETURN_CALL_METHOD(object, method, ...) SLIM_CALL_METHOD_WITH_PARAMS(return_value, object, Z_OBJCE_P(object), slim_fcall_method, method, __VA_ARGS__)
 
 #endif

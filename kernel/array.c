@@ -309,3 +309,112 @@ int slim_array_fetch_str(zval *return_value, const zval *arr, const char *index,
 
     return FAILURE;
 }
+
+int slim_array_update(zval *arr, const zval *index, zval *value, int flags)
+{
+	zval new_value = {};
+	HashTable *ht;
+
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		zend_error(E_WARNING, "Cannot use a scalar value as an array (2)");
+		return FAILURE;
+	}
+
+	if ((flags & PH_CTOR) == PH_CTOR) {
+		ZVAL_DUP(&new_value, value);
+		value = &new_value;
+	}
+
+	if ((flags & PH_SEPARATE) == PH_SEPARATE) {
+		SEPARATE_ZVAL_IF_NOT_REF(arr);
+	}
+
+	if ((flags & PH_COPY) == PH_COPY) {
+		Z_TRY_ADDREF_P(value);
+	}
+
+	ht = Z_ARRVAL_P(arr);
+
+	return slim_array_update_hash(ht, index, value, flags);
+}
+
+int slim_array_update_hash(HashTable *ht, const zval *index, zval *value, int flags)
+{
+	int status;
+
+	switch (Z_TYPE_P(index)) {
+		case IS_NULL:
+			status = zend_symtable_update(ht, ZSTR_EMPTY_ALLOC(), value) ? SUCCESS : FAILURE;
+			break;
+
+		case IS_DOUBLE:
+			status = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(index)), value) ? SUCCESS : FAILURE;
+			break;
+
+		case IS_TRUE:
+			status = zend_hash_index_update(ht, 1, value) ? SUCCESS : FAILURE;
+			break;
+
+		case IS_FALSE:
+			status = zend_hash_index_update(ht, 0, value) ? SUCCESS : FAILURE;
+			break;
+
+		case IS_LONG:
+			status = zend_hash_index_update(ht, Z_LVAL_P(index), value) ? SUCCESS : FAILURE;
+			break;
+
+		case IS_RESOURCE:
+			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(index), Z_RES_HANDLE_P(index));
+			status = zend_hash_index_update(ht, Z_RES_HANDLE_P(index), value) ? SUCCESS : FAILURE;
+			break;
+
+		case IS_STRING:
+			status = zend_symtable_update(ht, Z_STR_P(index), value) ? SUCCESS : FAILURE;
+			break;
+
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			status = FAILURE;
+			break;
+	}
+
+	return status;
+}
+
+int ZEND_FASTCALL slim_array_isset_fetch_long(zval *fetched, const zval *arr, ulong index, int flags)
+{
+	zval z_index = {};
+	int status;
+	ZVAL_LONG(&z_index, index);
+
+	status = slim_array_isset_fetch(fetched, arr, &z_index, flags);
+	return status;
+}
+
+int slim_array_update_str(zval *arr, const char *index, uint index_length, zval *value, int flags)
+{
+	zval new_value = {}, key = {};
+	int status;
+
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		zend_error(E_WARNING, "Cannot use a scalar value as an array (3)");
+		return FAILURE;
+	}
+
+	if ((flags & PH_CTOR) == PH_CTOR) {
+		ZVAL_DUP(&new_value, value);
+		value = &new_value;
+		Z_TRY_DELREF(new_value);
+	} else if ((flags & PH_COPY) == PH_COPY) {
+		Z_TRY_ADDREF_P(value);
+	}
+
+	if ((flags & PH_SEPARATE) == PH_SEPARATE) {
+		SEPARATE_ZVAL_IF_NOT_REF(arr);
+	}
+
+	ZVAL_STRINGL(&key, index, index_length);
+	status = slim_array_update_hash(Z_ARRVAL_P(arr), &key, value, flags);
+	zval_ptr_dtor(&key);
+	return status;
+}
