@@ -43,6 +43,7 @@
 
 zend_class_entry *slim_register_internal_interface_ex(zend_class_entry *orig_ce, zend_class_entry *parent_ce);
 
+int slim_read_global_str(zval *return_value, const char *global, unsigned int global_length);
 zval* slim_get_global_str(const char *global, unsigned int global_length);
 
 int slim_fetch_parameters(int num_args, int required_args, int optional_args, ...);
@@ -56,6 +57,8 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
     } else { \
         ZVAL_NULL(&slim_memory_entry); \
     }
+
+#define RETURN_EMPTY_ARRAY() array_init(return_value); return;
 
 #define SLIM_REGISTER_INTERFACE(ns, classname, name, methods)        \
     {                                                                   \

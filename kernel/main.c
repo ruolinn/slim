@@ -80,3 +80,24 @@ zval* slim_get_global_str(const char *global, unsigned int global_length) {
 
     return &SLIM_G(z_null);
 }
+
+int slim_read_global_str(zval *return_value, const char *global, unsigned int global_length) {
+    if (PG(auto_globals_jit)) {
+        zend_is_auto_global_str((char *)global, global_length);
+    }
+
+    if (&EG(symbol_table)) {
+        zval *gv;
+        if ((gv = zend_hash_str_find(&EG(symbol_table), global, global_length)) != NULL) {
+            if (EXPECTED(Z_TYPE_P(gv) == IS_REFERENCE)) {
+                gv = Z_REFVAL_P(gv);
+            }
+            if (Z_TYPE_P(gv) == IS_ARRAY) {
+                ZVAL_COPY_VALUE(return_value, gv);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}

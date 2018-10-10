@@ -1,5 +1,7 @@
 #include "kernel/array.h"
 
+#include <ext/standard/php_array.h>
+
 int slim_array_append(zval *arr, zval *value, int flags) {
 
     if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -214,4 +216,96 @@ int slim_array_update_long(zval *arr, ulong index, zval *value, int flags)
 	}
 
 	return zend_hash_index_update(Z_ARRVAL_P(arr), index, value) ? SUCCESS : FAILURE;
+}
+
+void slim_fast_array_merge(zval *return_value, zval *array1, zval *array2) {
+
+    int init_size, num;
+
+    if (Z_TYPE_P(array1) != IS_ARRAY) {
+        zend_error(E_WARNING, "First argument is not an array");
+        RETURN_NULL();
+    }
+
+    if (Z_TYPE_P(array2) != IS_ARRAY) {
+        zend_error(E_WARNING, "Second argument is not an array");
+        RETURN_NULL();
+    }
+
+    init_size = zend_hash_num_elements(Z_ARRVAL_P(array1));
+    num = zend_hash_num_elements(Z_ARRVAL_P(array2));
+    if (num > init_size) {
+        init_size = num;
+    }
+
+    array_init_size(return_value, init_size);
+
+    php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_P(array1));
+    php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_P(array2));
+}
+
+
+int ZEND_FASTCALL slim_array_isset(const zval *arr, const zval *index)
+{
+    HashTable *h;
+
+    if (Z_TYPE_P(arr) != IS_ARRAY) {
+        return 0;
+    }
+
+    h = Z_ARRVAL_P(arr);
+    switch (Z_TYPE_P(index)) {
+		case IS_NULL:
+        return zend_hash_str_exists(h, SL(""));
+
+		case IS_DOUBLE:
+        return zend_hash_index_exists(h, (ulong)Z_DVAL_P(index));
+
+		case IS_TRUE:
+		case IS_FALSE:
+        return zend_hash_index_exists(h, Z_TYPE_P(index) == IS_TRUE ? 1 : 0);
+
+		case IS_LONG:
+		case IS_RESOURCE:
+        return zend_hash_index_exists(h, Z_LVAL_P(index));
+
+		case IS_STRING:
+        return zend_symtable_exists(h, Z_STR_P(index));
+
+		default:
+        zend_error(E_WARNING, "Illegal offset type");
+        return 0;
+    }
+}
+
+int slim_array_fetch_str(zval *return_value, const zval *arr, const char *index, uint index_length, int flags)
+{
+
+    zval *zv;
+
+    if (likely(Z_TYPE_P(arr) == IS_ARRAY)) {
+        if ((zv = zend_hash_str_find(Z_ARRVAL_P(arr), index, index_length)) != NULL) {
+            if ((flags & PH_SEPARATE) == PH_SEPARATE) {
+                SEPARATE_ZVAL_IF_NOT_REF(zv);
+                ZVAL_COPY_VALUE(return_value, zv);
+            } else if ((flags & PH_READONLY) == PH_READONLY) {
+                ZVAL_COPY_VALUE(return_value, zv);
+            } else {
+                ZVAL_COPY(return_value, zv);
+            }
+            return SUCCESS;
+        }
+
+        if ((flags & PH_NOISY) == PH_NOISY) {
+            zend_error(E_NOTICE, "Undefined index: %s", index);
+        }
+    } else {
+        if ((flags & PH_NOISY) == PH_NOISY) {
+            zend_error(E_NOTICE, "Cannot use a scalar value as an array");
+        }
+    }
+
+    ZVAL_NULL(return_value);
+
+    return FAILURE;
 }

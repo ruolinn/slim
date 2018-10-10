@@ -146,3 +146,112 @@ zend_bool slim_get_boolval_ex(const zval *op) {
 void slim_convert_to_object(zval *op) {
     convert_to_object(op);
 }
+
+int slim_compare_strict_string(zval *op1, const char *op2, int op2_length){
+
+    switch (Z_TYPE_P(op1)) {
+		case IS_STRING:
+        if (!Z_STRLEN_P(op1) && !op2_length) {
+            return 1;
+        }
+        if (Z_STRLEN_P(op1) != op2_length) {
+            return 0;
+        }
+        return !zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), op2, op2_length);
+		case IS_NULL:
+        return !zend_binary_strcmp("", 0, op2, op2_length);
+		case IS_TRUE:
+        return !zend_binary_strcmp("1", strlen("1"), op2, op2_length);
+		case IS_FALSE:
+        return !zend_binary_strcmp("0", strlen("0"), op2, op2_length);
+    }
+
+    return 0;
+}
+
+int slim_compare_strict_long(zval *op1, zend_long op2){
+    switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+        return Z_LVAL_P(op1) == op2;
+		case IS_DOUBLE:
+        return Z_LVAL_P(op1) == (double) op2;
+		case IS_NULL:
+        return 0 == op2;
+		case IS_TRUE:
+        return 1 == op2;
+		case IS_FALSE:
+        return 0 == op2;
+		default: {
+        zval result = {}, op2_tmp = {};
+        ZVAL_LONG(&op2_tmp, op2);
+        is_equal_function(&result, op1, &op2_tmp);
+        return Z_TYPE(result) == IS_TRUE ? 1 : 0;
+		}
+    }
+
+    return 0;
+}
+
+int slim_compare_strict_double(zval *op1, double op2) {
+
+    switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+        return Z_LVAL_P(op1) == (zend_long) op2;
+		case IS_DOUBLE:
+        return Z_DVAL_P(op1) == op2;
+		case IS_NULL:
+        return 0 == op2;
+		case IS_TRUE:
+        return 1 == op2;
+		case IS_FALSE:
+        return 0 == op2;
+		default:
+        {
+            zval result = {}, op2_tmp = {};
+            ZVAL_DOUBLE(&op2_tmp, op2);
+            is_equal_function(&result, op1, &op2_tmp);
+            return Z_TYPE(result) == IS_TRUE ? 1 : 0;
+        }
+    }
+
+    return 0;
+}
+
+int slim_compare_strict_bool(zval *op1, zend_bool op2) {
+
+    switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+        return (Z_LVAL_P(op1) ? 1 : 0) == op2;
+		case IS_DOUBLE:
+        return (Z_DVAL_P(op1) ? 1 : 0) == op2;
+		case IS_NULL:
+        return 0 == op2;
+		case IS_TRUE:
+        return 1 == op2;
+		default:
+        {
+            zval result = {}, op2_tmp = {};
+            ZVAL_BOOL(&op2_tmp, op2);
+            is_equal_function(&result, op1, &op2_tmp);
+            return Z_TYPE(result) == IS_TRUE ? 1 : 0;
+        }
+    }
+
+    return 0;
+}
+
+int slim_and_function(zval *result, zval *left, zval *right){
+    int istrue = zend_is_true(left) && zend_is_true(right);
+    ZVAL_BOOL(result, istrue);
+    return SUCCESS;
+}
+
+int slim_is_equal(zval *op1, zval *op2)
+{
+    zval result = {};
+    if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op1) == Z_TYPE_P(op2)) {
+        return !zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+    }
+    is_equal_function(&result, op1, op2);
+    return Z_TYPE(result) == IS_TRUE ? 1 : 0;
+}

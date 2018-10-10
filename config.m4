@@ -79,6 +79,8 @@ kernel/fcall.c \
 kernel/string.c \
 kernel/array.c \
 kernel/operators.c \
+kernel/hash.c \
+kernel/concat.c \
 kernel/memory.c"
 
   PHP_NEW_EXTENSION(slim, $slim_sources, $ext_shared)

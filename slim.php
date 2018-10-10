@@ -15,7 +15,32 @@ if(!extension_loaded('slim')) {
 }
 
 $request = new Slim\Http\Request();
-print_r($request);exit;
+//var_dump($request->getPost());exit;
+//var_dump($request->getQuery('name'));exit;
+//var_dump($request->getServer('HTTP_HOST'));exit;
+//var_dump($request->getEnv('php'));exit;
+//var_dump($request->has('name'));exit;
+//var_dump($request->hasPost('name'));exit;
+//var_dump($request->isPut());exit;
+//var_dump($request->getRawBody());exit;
+//var_dump($request->getPut('age', 15));exit;
+//var_dump($request->hasPut('age'));exit;
+//var_dump($request->hasQuery('age'));exit;
+//var_dump($request->hasServer('HTTP_HOST'));exit;
+//var_dump($request->hasHeader('CONNECTION'));exit;
+//var_dump($request->getHeader('HTTP_CONNECTION'));exit;
+//var_dump($request->getScheme());exit;
+//var_dump($request->isSecure());exit;
+//var_dump($request->getServerAddress());exit;
+//var_dump($request->getServerName());exit;
+//var_dump($request->getHttpHost());exit;
+//var_dump($request->getClientAddress());exit;
+//var_dump($request->getMethod());exit;
+//var_dump($request->getURI());exit;
+//var_dump($request->getQueryString());exit;
+//var_dump($request->getUserAgent());exit;
+//var_dump($request->isMethod(['GET', 'POST']));
+var_dump($request->isPost());exit;
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 
