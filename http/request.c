@@ -43,6 +43,7 @@ PHP_METHOD(Slim_Http_Request, getServerName);
 PHP_METHOD(Slim_Http_Request, getHttpHost);
 PHP_METHOD(Slim_Http_Request, getClientAddress);
 PHP_METHOD(Slim_Http_Request, getMethod);
+PHP_METHOD(Slim_Http_Request, getPathInfo);
 PHP_METHOD(Slim_Http_Request, getURI);
 PHP_METHOD(Slim_Http_Request, getQueryString);
 PHP_METHOD(Slim_Http_Request, getUserAgent);
@@ -95,6 +96,7 @@ static const zend_function_entry slim_http_request_method_entry[] = {
 	PHP_ME(Slim_Http_Request, getHttpHost, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getClientAddress, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getMethod, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(Slim_Http_Request, getPathInfo, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getURI, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getQueryString, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getUserAgent, NULL, ZEND_ACC_PUBLIC)
@@ -627,6 +629,27 @@ PHP_METHOD(Slim_Http_Request, getMethod)
     }
 
     RETURN_EMPTY_STRING();
+}
+
+PHP_METHOD(Slim_Http_Request, getPathInfo)
+{
+	zval *_SERVER, url = {}, real_uri = {};
+
+    _SERVER = slim_get_global_str(SL("_SERVER"));
+    if (slim_array_isset_fetch_str(&url, _SERVER, SL("REQUEST_URI"), PH_READONLY)) {
+        zval url_parts = {};
+        slim_fast_explode_str(&url_parts, SL("?"), &url);
+
+        slim_array_fetch_long(&real_uri, &url_parts, 0, PH_NOISY|PH_COPY);
+        if (SLIM_IS_NOT_EMPTY(&real_uri)) {
+            zval_ptr_dtor(&url_parts);
+            RETVAL_ZVAL(&real_uri, 0, 0);
+            return;
+        }
+        zval_ptr_dtor(&url_parts);
+    }
+
+    RETURN_STRING("/");
 }
 
 PHP_METHOD(Slim_Http_Request, getURI)

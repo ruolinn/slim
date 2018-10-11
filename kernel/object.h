@@ -42,5 +42,10 @@ int slim_property_exists(zval *object, const char *property_name, uint32_t prope
 
 int slim_clone(zval *destination, zval *obj);
 
+int slim_read_static_property(zval *return_value, const char *class_name, uint32_t class_length, const char *property_name, uint32_t property_length, int flags);
+int slim_read_static_property_ce(zval *return_value, zend_class_entry *ce, const char *property, uint32_t len, int flags);
+
+int slim_update_static_property_ce(zend_class_entry *ce, const char *name, uint32_t len, zval *value);
+
 
 #endif

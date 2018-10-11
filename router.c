@@ -9,20 +9,20 @@
 
 //#include <main/SAPI.h>
 
+#include "interned-strings.h"
+
 zend_class_entry *slim_router_ce;
 
 PHP_METHOD(Slim_Router, __construct);
 PHP_METHOD(Slim_Router, add);
 PHP_METHOD(Slim_Router, getMatchedRoute);
 PHP_METHOD(Slim_Router, handle);
-PHP_METHOD(Slim_Router, getPathInfo);
 
 static const zend_function_entry slim_router_method_entry[] = {
     PHP_ME(Slim_Router, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
     PHP_ME(Slim_Router, add, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Router, getMatchedRoute, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Router, handle, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(Slim_Router, getPathInfo, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 
@@ -74,22 +74,17 @@ PHP_METHOD(Slim_Router, add)
 
 PHP_METHOD(Slim_Router, handle)
 {
-    zval *uri = NULL, real_uri = {}, route_found = {}, routes = {}, *route, handled_uri;
-    zval case_sensitive;
+    zval *uri = NULL, route_found = {}, routes = {}, *route, handled_uri;
+    zval case_sensitive, service = {}, request = {};
 
-    slim_fetch_params(0, 0, 1, &uri);
-
-    if (!uri || !zend_is_true(uri)) {
-        SLIM_CALL_METHOD(&real_uri, getThis(), "getpathinfo");
-    } else {
-        ZVAL_COPY_VALUE(&real_uri, uri);
-    }
+    slim_fetch_params(0, 1, 0, &uri);
 
     ZVAL_FALSE(&case_sensitive);
 
-    ZVAL_FALSE(&route_found);
-    ZVAL_COPY_VALUE(&handled_uri, &real_uri);
+	// 可以添加过滤uri逻辑
+    ZVAL_COPY_VALUE(&handled_uri, uri);
 
+	ZVAL_FALSE(&route_found);
 
     slim_read_property(&routes, getThis(), SL("_routes"), PH_NOISY|PH_READONLY);
 
@@ -114,28 +109,6 @@ PHP_METHOD(Slim_Router, handle)
 
     RETURN_FALSE;
 }
-
-PHP_METHOD(Slim_Router, getPathInfo)
-{
-    zval *_SERVER, url = {}, real_uri = {};
-
-    _SERVER = slim_get_global_str(SL("_SERVER"));
-    if (slim_array_isset_fetch_str(&url, _SERVER, SL("REQUEST_URI"), PH_READONLY)) {
-        zval url_parts = {};
-        slim_fast_explode_str(&url_parts, SL("?"), &url);
-
-        slim_array_fetch_long(&real_uri, &url_parts, 0, PH_NOISY|PH_COPY);
-        if (SLIM_IS_NOT_EMPTY(&real_uri)) {
-            zval_ptr_dtor(&url_parts);
-            RETVAL_ZVAL(&real_uri, 0, 0);
-            return;
-        }
-        zval_ptr_dtor(&url_parts);
-    }
-
-    RETURN_STRING("/");
-}
-
 
 PHP_METHOD(Slim_Router, getMatchedRoute)
 {

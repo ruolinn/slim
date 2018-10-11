@@ -19,10 +19,12 @@ SLIM_INIT_CLASS(Slim_Router_Route)
 {
     SLIM_REGISTER_CLASS(Slim\\Router, Route, router_route, slim_router_route_method_entry, 0);
 
+	zend_declare_property_null(slim_router_route_ce, SL("_id"), ZEND_ACC_PROTECTED);
     zend_declare_property_null(slim_router_route_ce, SL("_pattern"), ZEND_ACC_PROTECTED);
     zend_declare_property_null(slim_router_route_ce, SL("_compiledPattern"), ZEND_ACC_PROTECTED);
     zend_declare_property_null(slim_router_route_ce, SL("_methods"), ZEND_ACC_PROTECTED);
     zend_declare_property_null(slim_router_route_ce, SL("_callable"), ZEND_ACC_PROTECTED);
+	zend_declare_property_long(slim_router_route_ce, SL("_uniqueId"), 0, ZEND_ACC_STATIC|ZEND_ACC_PROTECTED);
 
     return SUCCESS;
 }
@@ -43,6 +45,16 @@ PHP_METHOD(Slim_Router_Route, __construct)
     slim_update_property(getThis(), SL("_compiledPattern"), &compiled_pattern);
     zval_ptr_dtor(&compiled_pattern);
 
+	slim_read_static_property_ce(&unique_id, slim_router_route_ce, SL("_uniqueId"), PH_READONLY);
+
+	if (Z_TYPE(unique_id) == IS_NULL) {
+		ZVAL_LONG(&unique_id, 0);
+	}
+
+	slim_update_property(getThis(), SL("_id"), &unique_id);
+
+	increment_function(&unique_id);
+	slim_update_static_property_ce(slim_router_route_ce, SL("_uniqueId"), &unique_id);
 }
 
 PHP_METHOD(Slim_Router_Route, getCompiledPattern)

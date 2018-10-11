@@ -413,3 +413,70 @@ int slim_clone(zval *destination, zval *obj)
 
     return status;
 }
+
+int slim_read_static_property(zval *return_value, const char *class_name, uint32_t class_length, const char *property_name, uint32_t property_length, int flags)
+{
+	zend_class_entry *ce;
+
+	if ((ce = zend_lookup_class(zend_string_init(class_name, class_length, 0))) != NULL) {
+		return slim_read_static_property_ce(return_value, ce, property_name, property_length, flags);
+	}
+
+	ZVAL_NULL(return_value);
+	return 0;
+}
+
+int slim_read_static_property_ce(zval *return_value, zend_class_entry *ce, const char *property, uint32_t len, int flags)
+{
+	zval *value = zend_read_static_property(ce, property, len, (zend_bool)ZEND_FETCH_CLASS_SILENT);
+	if (value) {
+		if (EXPECTED(Z_TYPE_P(value) == IS_REFERENCE)) {
+			value = Z_REFVAL_P(value);
+		}
+		if ((flags & PH_SEPARATE) == PH_SEPARATE) {
+			ZVAL_DUP(return_value, value);
+		} else if ((flags & PH_READONLY) == PH_READONLY) {
+			ZVAL_COPY_VALUE(return_value, value);
+		} else {
+			ZVAL_COPY(return_value, value);
+		}
+		return 1;
+	}
+	ZVAL_NULL(return_value);
+	return 0;
+}
+
+int slim_update_static_property_ce(zend_class_entry *ce, const char *property_name, uint32_t property_length, zval *value)
+{
+	zval garbage;
+	zval *property;
+	zend_class_entry *old_scope;
+	zend_string *key = zend_string_init(property_name, property_length, 0);
+
+#if PHP_VERSION_ID >= 70100
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
+#else
+	old_scope = EG(scope);
+	EG(scope) = ce;
+#endif
+	property = zend_std_get_static_property(ce, key, 0);
+#if PHP_VERSION_ID >= 70100
+	EG(fake_scope) = old_scope;
+#else
+	EG(scope) = old_scope;
+#endif
+	zend_string_free(key);
+
+	if (!property) {
+		return FAILURE;
+	} else {
+		ZVAL_COPY_VALUE(&garbage, property);
+		if (Z_ISREF_P(value)) {
+			SEPARATE_ZVAL(value);
+		}
+		ZVAL_COPY(property, value);
+		zval_ptr_dtor(&garbage);
+		return SUCCESS;
+	}
+}

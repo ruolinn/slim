@@ -49,7 +49,7 @@ if(!extension_loaded('slim')) {
 //var_dump($request->getLanguages());exit;
 //var_dump($request->getBestLanguage());exit;
 
-$response = new Slim\Http\Response;
+//$response = new Slim\Http\Response;
 //$response->setStatusCode(200, 'yes');
 //$response->setHeader('Accept', 'img');
 //$response->setHeaders(['Content-Type' => 'text/html']);
@@ -66,9 +66,14 @@ $response = new Slim\Http\Response;
 //var_dump($response->getJsonContent());exit;
 //$response->setHeader("Content-Type","application/bson");
 //$response->sendHeaders();
-
-print_r($response);exit;
-
+//print_r($response);exit;
+/*
+$router = new Slim\Router;
+$router->add('GET', '/home', function(){});
+$router->add('GET', '/profile', function(){});
+$router->add('POST', '/posts', function(){});
+print_r($router);exit;
+*/
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 
@@ -89,9 +94,4 @@ $router->add(['POST'], '/users', function() {
 //$_SERVER['REQUEST_URI'] = '/users?name=wangxiaoguang';
 $_SERVER['REQUEST_URI'] = '/home?name=wangxiaoguang';
 
-$app->handle();
-
-
-//$router = $app->getShared('router');
-
-//print_r($router);
+$app->run();

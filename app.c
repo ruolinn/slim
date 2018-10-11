@@ -19,12 +19,12 @@ zend_class_entry *slim_app_ce;
 
 PHP_METHOD(Slim_App, __construct);
 PHP_METHOD(Slim_App, bootstrapContainer);
-PHP_METHOD(Slim_App, handle);
+PHP_METHOD(Slim_App, run);
 
 static const zend_function_entry slim_app_method_entry[] = {
     PHP_ME(Slim_App, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
     PHP_ME(Slim_App, bootstrapContainer, NULL, ZEND_ACC_PROTECTED)
-    PHP_ME(Slim_App, handle, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_App, run, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 
@@ -49,27 +49,31 @@ PHP_METHOD(Slim_App, bootstrapContainer)
     SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
     zval_ptr_dtor(&definition);
 
+	ZVAL_STR(&service, IS(request));
+	ZVAL_STRING(&definition, "Slim\\Http\\Request");
+	SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
+	zval_ptr_dtor(&definition);
+
     ZVAL_STR(&service, IS(response));
     ZVAL_STRING(&definition, "Slim\\Http\\Response");
     SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
     zval_ptr_dtor(&definition);
 }
 
-PHP_METHOD(Slim_App, handle)
+PHP_METHOD(Slim_App, run)
 {
-    zval *uri = NULL, service = {}, router = {}, callable = {}, route = {}, parts = {};
+    zval uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
     zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
 
-    slim_fetch_params(0, 0, 1, &uri);
 
-    if (!uri) {
-        uri = &SLIM_G(z_null);
-    }
+	ZVAL_STR(&service, IS(request));
+	SLIM_CALL_SELF(&request, "getshared", &service);
+	SLIM_CALL_METHOD(&uri, &request, "getpathinfo");
 
     ZVAL_STR(&service, IS(router));
     SLIM_CALL_SELF(&router, "getshared", &service);
 
-    SLIM_CALL_METHOD(NULL, &router, "handle", uri);
+    SLIM_CALL_METHOD(NULL, &router, "handle", &uri);
 
 	SLIM_CALL_METHOD(&route, &router, "getmatchedroute");
 	SLIM_CALL_METHOD(&callable, &route, "getCallable");
