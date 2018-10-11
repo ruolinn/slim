@@ -380,3 +380,36 @@ int slim_property_exists(zval *object, const char *property_name, uint32_t prope
 
     return 0;
 }
+
+
+int slim_clone(zval *destination, zval *obj)
+{
+
+    int status = FAILURE;
+    zend_class_entry *ce;
+    zend_object_clone_obj_t clone_call;
+
+    if (Z_TYPE_P(obj) != IS_OBJECT) {
+        php_error_docref(NULL, E_ERROR, "__clone method called on non-object");
+        status = FAILURE;
+    } else {
+        clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
+        if (!clone_call) {
+            ce = Z_OBJCE_P(obj);
+            if (ce) {
+                php_error_docref(NULL, E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
+            } else {
+                php_error_docref(NULL, E_ERROR, "Trying to clone an uncloneable object");
+            }
+        } else {
+            ZVAL_OBJ(destination, clone_call(obj));
+            if (EG(exception)) {
+                ZVAL_NULL(destination);
+            } else {
+                status = SUCCESS;
+            }
+        }
+    }
+
+    return status;
+}

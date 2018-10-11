@@ -40,5 +40,7 @@ int slim_property_array_isset_fetch(zval *fetched, zval *object, const char *pro
 int slim_property_exists(zval *object, const char *property_name, uint32_t property_length, int flags);
 #define slim_isset_property(object, property_name, property_length) slim_property_exists(object, property_name, property_length, PH_BOTH)
 
+int slim_clone(zval *destination, zval *obj);
+
 
 #endif

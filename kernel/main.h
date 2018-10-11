@@ -117,4 +117,14 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
     }                                           \
     return;
 
+#define SLIM_VERIFY_CLASS_EX(instance, class_ce, exception_ce)       \
+    if (Z_TYPE_P(instance) != IS_OBJECT || !instanceof_function_ex(Z_OBJCE_P(instance), class_ce, 0)) { \
+        if (Z_TYPE_P(instance) != IS_OBJECT) {                          \
+            zend_throw_exception_ex(exception_ce, 0, "Unexpected value type: expected object of type %s, %s given", class_ce->name->val, zend_zval_type_name(instance)); \
+        } else {                                                        \
+            zend_throw_exception_ex(exception_ce, 0, "Unexpected value type: expected object of type %s, object of type %s given", class_ce->name->val, Z_OBJCE_P(instance)->name->val); \
+        }                                                               \
+        return;                                                         \
+    }
+
 #endif

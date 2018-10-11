@@ -14,7 +14,7 @@ if(!extension_loaded('slim')) {
 	dl('slim.' . PHP_SHLIB_SUFFIX);
 }
 
-$request = new Slim\Http\Request();
+//$request = new Slim\Http\Request();
 //var_dump($request->getPost());exit;
 //var_dump($request->getQuery('name'));exit;
 //var_dump($request->getServer('HTTP_HOST'));exit;
@@ -47,7 +47,28 @@ $request = new Slim\Http\Request();
 //var_dump($request->getClientCharsets());exit;
 //var_dump($request->getBestCharset());exit;
 //var_dump($request->getLanguages());exit;
-var_dump($request->getBestLanguage());exit;
+//var_dump($request->getBestLanguage());exit;
+
+$response = new Slim\Http\Response;
+//$response->setStatusCode(200, 'yes');
+//$response->setHeader('Accept', 'img');
+//$response->setHeaders(['Content-Type' => 'text/html']);
+//$response->setCookies(['key' => 'value']);
+//var_dump($response->getCookies());exit;
+//$response->setRawHeader('HTTP/1.1 404 Not Found');
+//$response->resetHeaders();
+//$response->setExpires(new DateTime());
+//$response->setContentType("application/json", "utf-8");
+//$response->setNotModified();
+//$response->setEtag('ene');
+//var_dump($response->getContent());exit;
+//$response->setContent('{"key":"vakue"}');
+//var_dump($response->getJsonContent());exit;
+//$response->setHeader("Content-Type","application/bson");
+//$response->sendHeaders();
+
+print_r($response);exit;
+
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 
