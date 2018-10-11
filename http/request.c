@@ -62,6 +62,11 @@ PHP_METHOD(Slim_Http_Request, _getQualityHeader);
 PHP_METHOD(Slim_Http_Request, _getBestQuality);
 PHP_METHOD(Slim_Http_Request, getAcceptableContent);
 PHP_METHOD(Slim_Http_Request, getBestAccept);
+PHP_METHOD(Slim_Http_Request, getClientCharsets);
+PHP_METHOD(Slim_Http_Request, getBestCharset);
+PHP_METHOD(Slim_Http_Request, getLanguages);
+PHP_METHOD(Slim_Http_Request, getBestLanguage);
+PHP_METHOD(Slim_Http_Request, getBasicAuth);
 
 
 static const zend_function_entry slim_http_request_method_entry[] = {
@@ -109,6 +114,11 @@ static const zend_function_entry slim_http_request_method_entry[] = {
 	PHP_ME(Slim_Http_Request, _getBestQuality, NULL, ZEND_ACC_PROTECTED)
 	PHP_ME(Slim_Http_Request, getAcceptableContent, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getBestAccept, NULL, ZEND_ACC_PUBLIC)
+  PHP_ME(Slim_Http_Request, getClientCharsets, NULL, ZEND_ACC_PUBLIC)
+  PHP_ME(Slim_Http_Request, getBestCharset, NULL, ZEND_ACC_PUBLIC)
+  PHP_ME(Slim_Http_Request, getLanguages, NULL, ZEND_ACC_PUBLIC)
+  PHP_ME(Slim_Http_Request, getBestLanguage, NULL, ZEND_ACC_PUBLIC)
+  PHP_ME(Slim_Http_Request, getBasicAuth, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -918,6 +928,94 @@ PHP_METHOD(Slim_Http_Request, getBestAccept)
 	SLIM_RETURN_CALL_METHOD(getThis(), "_getbestquality", &acceptable_content, &quality_index);
 	zval_ptr_dtor(&quality_index);
 	zval_ptr_dtor(&acceptable_content);
+}
+
+PHP_METHOD(Slim_Http_Request, getClientCharsets)
+{
+    zval charset_header = {}, quality_index = {};
+
+    ZVAL_STRING(&charset_header, "HTTP_ACCEPT_CHARSET");
+    ZVAL_STRING(&quality_index, "charset");
+
+    SLIM_RETURN_CALL_METHOD(getThis(), "_getqualityheader", &charset_header, &quality_index);
+    zval_ptr_dtor(&quality_index);
+    zval_ptr_dtor(&charset_header);
+}
+
+PHP_METHOD(Slim_Http_Request, getBestCharset)
+{
+    zval quality_index = {}, client_charsets = {};
+
+    ZVAL_STRING(&quality_index, "charset");
+
+    SLIM_CALL_METHOD(&client_charsets, getThis(), "getclientcharsets");
+    SLIM_RETURN_CALL_METHOD(getThis(), "_getbestquality", &client_charsets, &quality_index);
+    zval_ptr_dtor(&quality_index);
+    zval_ptr_dtor(&client_charsets);
+}
+
+PHP_METHOD(Slim_Http_Request, getLanguages)
+{
+    zval language_header = {}, quality_index = {};
+
+    ZVAL_STRING(&language_header, "HTTP_ACCEPT_LANGUAGE");
+    ZVAL_STRING(&quality_index, "language");
+
+    SLIM_RETURN_CALL_METHOD(getThis(), "_getqualityheader", &language_header, &quality_index);
+    zval_ptr_dtor(&quality_index);
+    zval_ptr_dtor(&language_header);
+}
+
+PHP_METHOD(Slim_Http_Request, getBestLanguage)
+{
+    zval languages = {}, quality_index = {};
+
+    SLIM_CALL_METHOD(&languages, getThis(), "getlanguages");
+
+    ZVAL_STRING(&quality_index, "language");
+    SLIM_RETURN_CALL_METHOD(getThis(), "_getbestquality", &languages, &quality_index);
+    zval_ptr_dtor(&quality_index);
+    zval_ptr_dtor(&languages);
+}
+
+PHP_METHOD(Slim_Http_Request, getBasicAuth)
+{
+	zval *_SERVER, *value, key = {};
+	char *auth_user = SG(request_info).auth_user;
+	char *auth_password = SG(request_info).auth_password;
+
+	if (unlikely(!auth_user)) {
+		_SERVER = slim_get_global_str(SL("_SERVER"));
+		if (Z_TYPE_P(_SERVER) == IS_ARRAY) {
+			ZVAL_STRING(&key, "PHP_AUTH_USER");
+
+			value = slim_hash_get(Z_ARRVAL_P(_SERVER), &key, BP_VAR_UNSET);
+			zval_ptr_dtor(&key);
+			if (value && Z_TYPE_P(value) == IS_STRING) {
+				auth_user = Z_STRVAL_P(value);
+			}
+
+			ZVAL_STRING(&key, "PHP_AUTH_PW");
+
+			value = slim_hash_get(Z_ARRVAL_P(_SERVER), &key, BP_VAR_UNSET);
+			zval_ptr_dtor(&key);
+			if (value && Z_TYPE_P(value) == IS_STRING) {
+				auth_password = Z_STRVAL_P(value);
+			}
+		}
+	}
+
+	if (!auth_user) {
+		RETURN_NULL();
+	}
+
+	if (!auth_password) {
+		auth_password = "";
+	}
+
+	array_init_size(return_value, 2);
+	slim_array_update_str_str(return_value, SL("username"), auth_user, strlen(auth_user), 0);
+	slim_array_update_str_str(return_value, SL("password"), auth_password, strlen(auth_password), 0);
 }
 
 static const char* slim_http_request_getmethod_helper()

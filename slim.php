@@ -44,6 +44,10 @@ $request = new Slim\Http\Request();
 //var_dump($request->getHttpReferer());exit;
 //print_r($request->getAcceptableContent());exit;
 //print_r($request->getBestAccept());exit;
+//var_dump($request->getClientCharsets());exit;
+//var_dump($request->getBestCharset());exit;
+//var_dump($request->getLanguages());exit;
+var_dump($request->getBestLanguage());exit;
 
 $app = new Slim\App;//print_r(get_parent_class($app));exit;
 

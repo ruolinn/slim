@@ -418,3 +418,4 @@ int slim_array_update_str(zval *arr, const char *index, uint index_length, zval 
 	zval_ptr_dtor(&key);
 	return status;
 }
+
