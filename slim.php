@@ -79,7 +79,7 @@ $app = new Slim\App;//print_r(get_parent_class($app));exit;
 
 $router = $app->getShared('router');
 
-$router->add(['GET'], '/home', 'HomeController::index');
+$router->add(['GET', 'POST'], "/home/{year:[0-9]+}/{title:[a-z\-]+}", 'HomeController::index');
 
 /*
 $router->add(['GET'], '/home', function() {
@@ -92,6 +92,18 @@ $router->add(['POST'], '/users', function() {
 });
 
 //$_SERVER['REQUEST_URI'] = '/users?name=wangxiaoguang';
-$_SERVER['REQUEST_URI'] = '/home?name=wangxiaoguang';
+$_SERVER['REQUEST_URI'] = '/home/2019/title?name=wangxiaoguang';
+
+$router->dispatch('GET', '/home/2019/title');
+
+//$route = $router->getMatchedRoute();
+
+//print_r($route->getPaths());exit;
+//print_r($router->getRoutes());exit;
+//print_r($route->prepare("App\Http\HomeController"));exit;
+//var_dump($route->isMethod("GET"));exit;
+//var_dump($route->isMethod("POST"));exit;
+
+print_r($router);exit;
 
 $app->run();

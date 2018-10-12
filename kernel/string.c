@@ -224,3 +224,137 @@ void slim_substr(zval *return_value, zval *str, unsigned long from, long length)
 		ZVAL_NULL(return_value);
 	}
 }
+
+void slim_camelize(zval *return_value, const zval *str)
+{
+    int i, len;
+    smart_str camelize_str = {0};
+    char *marker, ch;
+
+    if (unlikely(Z_TYPE_P(str) != IS_STRING)) {
+        zend_error(E_WARNING, "Invalid arguments supplied for camelize()");
+        RETURN_EMPTY_STRING();
+        return;
+    }
+
+    marker = Z_STRVAL_P(str);
+    len    = Z_STRLEN_P(str);
+
+    for (i = 0; i < len; i++) {
+        ch = marker[i];
+        if (i == 0 || ch == '-' || ch == '_' || ch == '\\') {
+            if (ch == '-' || ch == '_') {
+                i++;
+            } else if (ch == '\\') {
+                smart_str_appendc(&camelize_str, marker[i]);
+                i++;
+            }
+
+            if (i < len) {
+                smart_str_appendc(&camelize_str, toupper(marker[i]));
+            }
+        } else {
+            smart_str_appendc(&camelize_str, tolower(marker[i]));
+        }
+    }
+
+    smart_str_0(&camelize_str);
+
+    if (camelize_str.s) {
+        ZVAL_NEW_STR(return_value, camelize_str.s);
+    } else {
+        ZVAL_EMPTY_STRING(return_value);
+    }
+
+}
+
+void slim_uncamelize(zval *return_value, const zval *str)
+{
+    int i;
+    smart_str uncamelize_str = {0};
+    char *marker, ch;
+
+    if (Z_TYPE_P(str) != IS_STRING) {
+        zend_error(E_WARNING, "Invalid arguments supplied for camelize()");
+        return;
+    }
+
+    marker = Z_STRVAL_P(str);
+    for (i = 0; i < Z_STRLEN_P(str); i++) {
+        ch = *marker;
+        if (ch == '\0') {
+            break;
+        }
+        if (ch >= 'A' && ch <= 'Z') {
+            if (i > 0) {
+                smart_str_appendc(&uncamelize_str, '_');
+            }
+            smart_str_appendc(&uncamelize_str, (*marker) + 32);
+        } else {
+            smart_str_appendc(&uncamelize_str, (*marker));
+        }
+        marker++;
+    }
+    smart_str_0(&uncamelize_str);
+
+    if (uncamelize_str.s) {
+        RETURN_NEW_STR(uncamelize_str.s);
+    } else {
+        RETURN_EMPTY_STRING();
+    }
+}
+
+void slim_strtolower_inplace(zval *s)
+{
+    if (likely(Z_TYPE_P(s) == IS_STRING)) {
+        zend_str_tolower(Z_STRVAL_P(s), Z_STRLEN_P(s));
+    }
+}
+
+int slim_start_with_str(const zval *str, char *compared, unsigned int compared_length)
+{
+    if (Z_TYPE_P(str) != IS_STRING || compared_length > (uint)(Z_STRLEN_P(str))) {
+        return 0;
+    }
+
+    return !memcmp(Z_STRVAL_P(str), compared, compared_length);
+}
+
+int slim_preg_match(zval *retval, zval *regex, zval *subject, zval *matches, zend_long flags, int global)
+{
+    pcre_cache_entry *pce;
+    zend_long start_offset = 0;
+    int use_flags = flags ? 1 : 0;
+
+    if (Z_TYPE_P(subject) != IS_STRING) {
+        convert_to_string_ex(subject);
+    }
+
+    ZVAL_FALSE(retval);
+    if (ZEND_SIZE_T_INT_OVFL(Z_STRLEN_P(subject))) {
+        php_error_docref(NULL, E_WARNING, "Subject is too long");
+        return FAILURE;
+    }
+
+    /* Compile regex or get it from cache. */
+    if ((pce = pcre_get_compiled_regex_cache(Z_STR_P(regex))) == NULL) {
+        return FAILURE;
+    }
+
+    //pce->refcount++;
+    php_pcre_match_impl(pce, Z_STRVAL_P(subject), Z_STRLEN_P(subject), retval, matches, global, use_flags, flags, start_offset);
+    //pce->refcount--;
+    return SUCCESS;
+}
+
+void slim_fast_explode(zval *result, zval *delimiter, zval *str)
+{
+    if (unlikely(Z_TYPE_P(str) != IS_STRING || Z_TYPE_P(delimiter) != IS_STRING)) {
+        ZVAL_NULL(result);
+        zend_error(E_WARNING, "Invalid arguments supplied for explode()");
+        return;
+    }
+
+    array_init(result);
+    php_explode(Z_STR_P(delimiter), Z_STR_P(str), result, LONG_MAX);
+}

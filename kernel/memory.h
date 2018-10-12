@@ -5,6 +5,8 @@
 #include "kernel/main.h"
 #include <stdint.h>
 
+#define SLIM_ZVAL_DUP(d, v) ZVAL_DUP(d, v);
+
 void slim_initialize_memory(zend_slim_globals *slim_globals_ptr);
 
 #endif

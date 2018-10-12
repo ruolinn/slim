@@ -6,6 +6,7 @@
 #include "container/service.h"
 #include "container/exception.h"
 #include "router.h"
+#include "router/exception.h"
 #include "router/route.h"
 #include "http/request.h"
 #include "http/responseinterface.h"

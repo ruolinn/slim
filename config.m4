@@ -65,6 +65,7 @@ container.c \
 container/service.c \
 container/exception.c \
 router.c \
+router/exception.c \
 router/route.c \
 http/request.c \
 http/response/headers.c \
@@ -82,6 +83,7 @@ kernel/array.c \
 kernel/operators.c \
 kernel/hash.c \
 kernel/concat.c \
+kernel/framework/router.c \
 kernel/memory.c"
 
   PHP_NEW_EXTENSION(slim, $slim_sources, $ext_shared)

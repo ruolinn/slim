@@ -4,6 +4,9 @@
 #include "php_slim.h"
 #include "kernel/main.h"
 
+void slim_get_class_ns(zval *result, const zval *object, int lower);
+void slim_get_ns_class(zval *result, const zval *object, int lower);
+
 zend_class_entry *slim_class_exists(const zval *class_name, int autoload);
 zend_class_entry *slim_class_exists_ex(const zval *class_name, int autoload);
 
@@ -23,6 +26,7 @@ static inline zend_class_entry *slim_lookup_class_ce(zend_class_entry *ce, const
 int slim_read_property(zval *result, zval *object, const char *property_name, uint32_t property_length, int flags);
 
 int slim_update_property(zval *obj, const char *property_name, uint32_t property_length, zval *value);
+int slim_update_property_null(zval *obj, const char *property_name, uint32_t property_length);
 int slim_update_property_empty_array(zval *object, const char *property, uint32_t property_length);
 int slim_update_property_array_append(zval *object, const char *property, uint32_t property_length, zval *value);
 int slim_update_property_bool(zval *obj, const char *property_name, uint32_t property_length, int value);

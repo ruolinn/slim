@@ -5,6 +5,7 @@
 #include "kernel/memory.h"
 
 int ZEND_FASTCALL slim_array_isset(const zval *arr, const zval *index);
+int ZEND_FASTCALL slim_array_unset_str(zval *arr, const char *index, uint index_length, int flags);
 
 int slim_array_append(zval *arr, zval *value, int flags);
 

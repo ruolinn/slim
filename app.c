@@ -62,52 +62,53 @@ PHP_METHOD(Slim_App, bootstrapContainer)
 
 PHP_METHOD(Slim_App, run)
 {
-    zval uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
+    zval http_method = {}, uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
     zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
 
 
-	ZVAL_STR(&service, IS(request));
-	SLIM_CALL_SELF(&request, "getshared", &service);
-	SLIM_CALL_METHOD(&uri, &request, "getpathinfo");
+    ZVAL_STR(&service, IS(request));
+    SLIM_CALL_SELF(&request, "getshared", &service);
+    SLIM_CALL_METHOD(&uri, &request, "getpathinfo");
+    SLIM_CALL_METHOD(&http_method, &request, "getmethod");
 
     ZVAL_STR(&service, IS(router));
     SLIM_CALL_SELF(&router, "getshared", &service);
 
-    SLIM_CALL_METHOD(NULL, &router, "handle", &uri);
+    SLIM_CALL_METHOD(NULL, &router, "dispatch", &http_method, &uri);
 
-	SLIM_CALL_METHOD(&route, &router, "getmatchedroute");
-	SLIM_CALL_METHOD(&callable, &route, "getCallable");
+    SLIM_CALL_METHOD(&route, &router, "getmatchedroute");
+    SLIM_CALL_METHOD(&callable, &route, "getCallable");
 
-	if (Z_TYPE(callable) == IS_OBJECT) {
-		if (instanceof_function(Z_OBJCE(callable), zend_ce_closure)) {
-			SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &callable, NULL);
-		}
-	} else if (Z_TYPE(callable) == IS_STRING) {
-		slim_fast_explode_str(&parts, SL("::"), &callable);
-		SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &parts, NULL);
-	}
+    if (Z_TYPE(callable) == IS_OBJECT) {
+        if (instanceof_function(Z_OBJCE(callable), zend_ce_closure)) {
+            SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &callable, NULL);
+        }
+    } else if (Z_TYPE(callable) == IS_STRING) {
+        slim_fast_explode_str(&parts, SL("::"), &callable);
+        SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &parts, NULL);
+    }
 
-  if (Z_TYPE(possible_response) == IS_OBJECT && instanceof_function_ex(Z_OBJCE(possible_response), slim_http_responseinterface_ce, 1)) {
-      ZVAL_COPY_VALUE(&response, &possible_response);
-      ZVAL_TRUE(&returned_response);
-  } else {
-      ZVAL_STR(&service, IS(response));
-      SLIM_CALL_METHOD(&response, getThis(), "getshared", &service);
+    if (Z_TYPE(possible_response) == IS_OBJECT && instanceof_function_ex(Z_OBJCE(possible_response), slim_http_responseinterface_ce, 1)) {
+        ZVAL_COPY_VALUE(&response, &possible_response);
+        ZVAL_TRUE(&returned_response);
+    } else {
+        ZVAL_STR(&service, IS(response));
+        SLIM_CALL_METHOD(&response, getThis(), "getshared", &service);
 
-      ZVAL_FALSE(&returned_response);
-  }
+        ZVAL_FALSE(&returned_response);
+    }
 
-  if (SLIM_IS_FALSE(&returned_response)) {
-      if (Z_TYPE(possible_response) == IS_STRING) {
-          SLIM_CALL_METHOD(NULL, &response, "setcontent", &possible_response);
-      } else if (Z_TYPE(possible_response) == IS_ARRAY) {
-          SLIM_CALL_METHOD(NULL, &response, "setjsoncontent", &possible_response);
-      }
-  }
+    if (SLIM_IS_FALSE(&returned_response)) {
+        if (Z_TYPE(possible_response) == IS_STRING) {
+            SLIM_CALL_METHOD(NULL, &response, "setcontent", &possible_response);
+        } else if (Z_TYPE(possible_response) == IS_ARRAY) {
+            SLIM_CALL_METHOD(NULL, &response, "setjsoncontent", &possible_response);
+        }
+    }
 
-  SLIM_CALL_METHOD(&returned_response_sent, &response, "issent");
+    SLIM_CALL_METHOD(&returned_response_sent, &response, "issent");
 
-  if (SLIM_IS_FALSE(&returned_response_sent)) {
-      SLIM_CALL_METHOD(NULL, &response, "send");
-  }
+    if (SLIM_IS_FALSE(&returned_response_sent)) {
+        SLIM_CALL_METHOD(NULL, &response, "send");
+    }
 }

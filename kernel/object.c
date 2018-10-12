@@ -1,5 +1,6 @@
 #include "kernel/object.h"
 #include "kernel/array.h"
+#include "kernel/string.h"
 #include "kernel/fcall.h"
 #include "kernel/exception.h"
 #include "kernel/../exception.h"
@@ -479,4 +480,127 @@ int slim_update_static_property_ce(zend_class_entry *ce, const char *property_na
 		zval_ptr_dtor(&garbage);
 		return SUCCESS;
 	}
+}
+
+
+int slim_update_property_null(zval *object, const char *property_name, uint32_t property_length)
+{
+    zval v = {};
+    int ret;
+    ZVAL_NULL(&v);
+    ret = slim_update_property(object, property_name, property_length, &v);
+    zval_ptr_dtor(&v);
+    return ret;
+}
+
+void slim_get_class_ns(zval *result, const zval *object, int lower)
+{
+	int found = 0;
+	zend_class_entry *ce;
+	uint32_t i, class_length;
+	const char *cursor, *class_name;
+
+	if (Z_TYPE_P(object) != IS_OBJECT) {
+		if (Z_TYPE_P(object) != IS_STRING) {
+			ZVAL_NULL(result);
+			php_error_docref(NULL, E_WARNING, "slim_get_class_ns expects an object");
+			return;
+		}
+	}
+
+	if (Z_TYPE_P(object) == IS_OBJECT) {
+		ce = Z_OBJCE_P(object);
+		class_name = ce->name->val;
+		class_length = ce->name->len;
+	} else {
+		class_name = Z_STRVAL_P(object);
+		class_length = Z_STRLEN_P(object);
+	}
+
+	if (!class_length) {
+		ZVAL_NULL(result);
+		return;
+	}
+
+	i = class_length;
+	cursor = (char *) (class_name + class_length - 1);
+
+	while (i > 0) {
+		if ((*cursor) == '\\') {
+			found = 1;
+			break;
+		}
+		cursor--;
+		i--;
+	}
+
+	if (found) {
+		ZVAL_NEW_STR(result, zend_string_init(class_name + i, class_length - i + 1, 0));
+	} else {
+		ZVAL_STRINGL(result, class_name, class_length);
+	}
+
+	if (lower) {
+		slim_strtolower_inplace(result);
+	}
+}
+
+void slim_get_ns_class(zval *result, const zval *object, int lower)
+{
+	zend_class_entry *ce;
+	int found = 0;
+	uint32_t i, j, class_length;
+	const char *cursor, *class_name;
+
+	if (Z_TYPE_P(object) != IS_OBJECT) {
+		if (Z_TYPE_P(object) != IS_STRING) {
+			php_error_docref(NULL, E_WARNING, "slim_get_ns_class expects an object");
+			ZVAL_NULL(result);
+			return;
+		}
+	}
+
+	if (Z_TYPE_P(object) == IS_OBJECT) {
+		ce = Z_OBJCE_P(object);
+		class_name = ce->name->val;
+		class_length = ce->name->len;
+	} else {
+		class_name = Z_STRVAL_P(object);
+		class_length = Z_STRLEN_P(object);
+	}
+
+	if (!class_length) {
+		ZVAL_NULL(result);
+		return;
+	}
+
+	j = 0;
+	i = class_length;
+	cursor = (char *) (class_name + class_length - 1);
+
+	while (i > 0) {
+		if ((*cursor) == '\\') {
+			found = 1;
+			break;
+		}
+		cursor--;
+		i--;
+		j++;
+	}
+
+	if (j > 0) {
+
+		if (found) {
+			ZVAL_STRINGL(result, class_name, class_length - j - 1);
+		} else {
+			ZVAL_EMPTY_STRING(result);
+		}
+
+		if (lower) {
+			zend_string_tolower(Z_STR_P(result));
+		}
+	} else {
+		ZVAL_NULL(result);
+	}
+
 }

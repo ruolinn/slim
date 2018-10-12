@@ -419,3 +419,15 @@ int slim_array_update_str(zval *arr, const char *index, uint index_length, zval 
 	return status;
 }
 
+int ZEND_FASTCALL slim_array_unset_str(zval *arr, const char *index, uint index_length, int flags)
+{
+    if (Z_TYPE_P(arr) != IS_ARRAY) {
+        return FAILURE;
+    }
+
+    if ((flags & PH_SEPARATE) == PH_SEPARATE) {
+        SEPARATE_ZVAL_IF_NOT_REF(arr);
+    }
+
+    return zend_hash_str_del(Z_ARRVAL_P(arr), index, index_length);
+}

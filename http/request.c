@@ -47,7 +47,6 @@ PHP_METHOD(Slim_Http_Request, getPathInfo);
 PHP_METHOD(Slim_Http_Request, getURI);
 PHP_METHOD(Slim_Http_Request, getQueryString);
 PHP_METHOD(Slim_Http_Request, getUserAgent);
-PHP_METHOD(Slim_Http_Request, isMethod);
 PHP_METHOD(Slim_Http_Request, isPost);
 PHP_METHOD(Slim_Http_Request, isGet);
 PHP_METHOD(Slim_Http_Request, isPut);
@@ -100,7 +99,6 @@ static const zend_function_entry slim_http_request_method_entry[] = {
 	PHP_ME(Slim_Http_Request, getURI, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getQueryString, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, getUserAgent, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(Slim_Http_Request, isMethod, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isPost, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isGet, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Slim_Http_Request, isPut, NULL, ZEND_ACC_PUBLIC)
@@ -693,31 +691,6 @@ PHP_METHOD(Slim_Http_Request, getUserAgent)
     }
 
     RETURN_EMPTY_STRING();
-}
-
-PHP_METHOD(Slim_Http_Request, isMethod)
-{
-    zval *methods, http_method = {}, *method;
-
-    slim_fetch_params(0, 1, 0, &methods);
-
-    SLIM_CALL_METHOD(&http_method, getThis(), "getmethod");
-
-    if (Z_TYPE_P(methods) == IS_STRING) {
-        is_equal_function(return_value, methods, &http_method);
-        zval_ptr_dtor(&http_method);
-        return;
-    }
-
-    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(methods), method) {
-        if (SLIM_IS_EQUAL(method, &http_method)) {
-            zval_ptr_dtor(&http_method);
-            RETURN_TRUE;
-        }
-    } ZEND_HASH_FOREACH_END();
-    zval_ptr_dtor(&http_method);
-
-    RETURN_FALSE;
 }
 
 PHP_METHOD(Slim_Http_Request, isPost)
