@@ -5,6 +5,7 @@
 #include "container.h"
 #include "container/service.h"
 #include "container/exception.h"
+#include "loader.h"
 #include "router.h"
 #include "router/exception.h"
 #include "router/route.h"

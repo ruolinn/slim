@@ -14,6 +14,13 @@ if(!extension_loaded('slim')) {
 	dl('slim.' . PHP_SHLIB_SUFFIX);
 }
 
+$loader = new Slim\Loader();
+$loader->registerNamespaces([
+    'App\Http' => __DIR__.'/src',
+]);
+
+print_r($loader);exit;
+
 //$request = new Slim\Http\Request();
 //var_dump($request->getPost());exit;
 //var_dump($request->getQuery('name'));exit;
@@ -94,7 +101,7 @@ $router->add(['POST'], '/users', function() {
 //$_SERVER['REQUEST_URI'] = '/users?name=wangxiaoguang';
 $_SERVER['REQUEST_URI'] = '/home/2019/title?name=wangxiaoguang';
 
-$router->dispatch('GET', '/home/2019/title');
+//$router->dispatch('GET', '/home/2019/title');
 
 //$route = $router->getMatchedRoute();
 

@@ -14,6 +14,7 @@ extern zend_string *slim_interned_parent;
 extern zend_string *slim_interned_router;
 extern zend_string *slim_interned_request;
 extern zend_string *slim_interned_response;
+extern zend_string *slim_interned_php;
 
 void slim_init_interned_strings();
 void slim_release_interned_strings();

@@ -60,18 +60,6 @@ if test "$PHP_SLIM" != "no"; then
   dnl PHP_SUBST(SLIM_SHARED_LIBADD)
 
   slim_sources="slim.c \
-app.c \
-container.c \
-container/service.c \
-container/exception.c \
-router.c \
-router/exception.c \
-router/route.c \
-http/request.c \
-http/response/headers.c \
-http/response.c \
-http/response/exception.c \
-http/responseinterface.c \
 exception.c \
 interned-strings.c \
 kernel/object.c \
@@ -84,7 +72,20 @@ kernel/operators.c \
 kernel/hash.c \
 kernel/concat.c \
 kernel/framework/router.c \
-kernel/memory.c"
+kernel/memory.c \
+app.c \
+container.c \
+container/service.c \
+container/exception.c \
+router.c \
+router/exception.c \
+router/route.c \
+http/request.c \
+http/response/headers.c \
+http/response.c \
+http/response/exception.c \
+http/responseinterface.c \
+loader.c"
 
   PHP_NEW_EXTENSION(slim, $slim_sources, $ext_shared)
 fi

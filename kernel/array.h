@@ -19,6 +19,16 @@ int slim_array_fetch_long(zval *return_value, const zval *arr, ulong index, int 
 int slim_array_update_str(zval *arr, const char *index, uint index_length, zval *value, int flags);
 int slim_array_update_long(zval *arr, ulong index, zval *value, int flags);
 
+static inline int slim_array_append_string(zval *arr, zend_string *value, int flags)
+{
+    zval zvalue;
+    int ret;
+
+    ZVAL_STR(&zvalue, value);
+    ret = slim_array_append(arr, &zvalue, flags);
+    return ret;
+}
+
 static inline int slim_array_update_str_str(zval *arr, const char *index, uint index_length, char *value, uint value_length, int flags)
 {
     zval zvalue;

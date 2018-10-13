@@ -431,3 +431,4 @@ int ZEND_FASTCALL slim_array_unset_str(zval *arr, const char *index, uint index_
 
     return zend_hash_str_del(Z_ARRVAL_P(arr), index, index_length);
 }
+
