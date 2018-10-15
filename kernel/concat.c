@@ -94,3 +94,41 @@ void slim_concat_svs(zval *result, const char *op1, uint32_t op1_len, zval *op2,
         ZVAL_NULL(result);
     }
 }
+
+void slim_concat_vv(zval *result, zval *op1, zval *op2, int self_var)
+{
+    smart_str implstr = {0};
+
+    if (self_var) {
+        slim_append_printable_zval(&implstr, result);
+    }
+    slim_append_printable_zval(&implstr, op1);
+    slim_append_printable_zval(&implstr, op2);
+    smart_str_0(&implstr);
+    if (implstr.s) {
+        ZVAL_NEW_STR(result, implstr.s);
+    } else {
+        smart_str_free(&implstr);
+        ZVAL_NULL(result);
+    }
+}
+
+void slim_concat_vvsv(zval *result, zval *op1, zval *op2, const char *op3, uint32_t op3_len, zval *op4, int self_var)
+{
+    smart_str implstr = {0};
+
+    if (self_var) {
+        slim_append_printable_zval(&implstr, result);
+    }
+    slim_append_printable_zval(&implstr, op1);
+    slim_append_printable_zval(&implstr, op2);
+    slim_smart_str_appendl(&implstr, op3, op3_len);
+    slim_append_printable_zval(&implstr, op4);
+    smart_str_0(&implstr);
+    if (implstr.s) {
+        ZVAL_NEW_STR(result, implstr.s);
+    } else {
+        smart_str_free(&implstr);
+        ZVAL_NULL(result);
+    }
+}

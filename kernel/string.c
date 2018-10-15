@@ -358,3 +358,39 @@ void slim_fast_explode(zval *result, zval *delimiter, zval *str)
     array_init(result);
     php_explode(Z_STR_P(delimiter), Z_STR_P(str), result, LONG_MAX);
 }
+
+int slim_start_with(const zval *str, const zval *compared, zval *case_sensitive)
+{
+    int sensitive = 0;
+    int i;
+    char *op1_cursor, *op2_cursor;
+
+    if (Z_TYPE_P(str) != IS_STRING || Z_TYPE_P(compared) != IS_STRING) {
+        return 0;
+    }
+
+    if (!Z_STRLEN_P(compared) || !Z_STRLEN_P(str) || Z_STRLEN_P(compared) > Z_STRLEN_P(str)) {
+        return 0;
+    }
+
+    if (case_sensitive) {
+        sensitive = zend_is_true(case_sensitive);
+    }
+
+    if (!sensitive) {
+        return !memcmp(Z_STRVAL_P(str), Z_STRVAL_P(compared), Z_STRLEN_P(compared));
+    }
+
+    op1_cursor = Z_STRVAL_P(str);
+    op2_cursor = Z_STRVAL_P(compared);
+    for (i = 0; i < Z_STRLEN_P(compared); i++) {
+        if (tolower(*op1_cursor) != tolower(*op2_cursor)) {
+            return 0;
+        }
+
+        op1_cursor++;
+        op2_cursor++;
+    }
+
+    return 1;
+}

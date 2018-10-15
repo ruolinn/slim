@@ -31,6 +31,7 @@ void slim_substr(zval *return_value, zval *str, unsigned long from, long length)
 void slim_camelize(zval *return_value, const zval *str);
 void slim_uncamelize(zval *return_value, const zval *str);
 
+int slim_start_with(const zval *str, const zval *compared, zval *case_sensitive);
 int slim_start_with_str(const zval *str, char *compared, unsigned int compared_length);
 
 int slim_preg_match(zval *return_value, zval *regex, zval *subject, zval *matches, zend_long flags, int global);

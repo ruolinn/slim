@@ -16,10 +16,13 @@ if(!extension_loaded('slim')) {
 
 $loader = new Slim\Loader();
 $loader->registerNamespaces([
-    'App\Http' => __DIR__.'/src',
+    'App' => __DIR__.'/src',
 ]);
+$loader->register();
 
-print_r($loader);exit;
+
+$c = new App\Http\HomeController;
+print_r($c);exit;
 
 //$request = new Slim\Http\Request();
 //var_dump($request->getPost());exit;

@@ -17,6 +17,7 @@ zend_string *slim_interned_router = NULL;
 zend_string *slim_interned_request						= NULL;
 zend_string *slim_interned_response = NULL;
 zend_string *slim_interned_php							= NULL;
+zend_string *slim_interned_autoLoad						= NULL;
 
 void slim_init_interned_strings()
 {
@@ -34,6 +35,7 @@ void slim_init_interned_strings()
     slim_interned_request						= SSL("request");
     slim_interned_response = SSL("response");
     slim_interned_php							= SSL("php");
+    slim_interned_autoLoad						= SSL("autoLoad");
 }
 
 
@@ -53,4 +55,5 @@ void slim_release_interned_strings()
     zend_string_release(slim_interned_request);
     zend_string_release(slim_interned_response);
     zend_string_release(slim_interned_php);
+    zend_string_release(slim_interned_autoLoad);
 }

@@ -73,6 +73,8 @@ kernel/hash.c \
 kernel/concat.c \
 kernel/framework/router.c \
 kernel/memory.c \
+kernel/file.c \
+kernel/require.c \
 app.c \
 container.c \
 container/service.c \
