@@ -51,5 +51,6 @@ int slim_read_static_property_ce(zval *return_value, zend_class_entry *ce, const
 
 int slim_update_static_property_ce(zend_class_entry *ce, const char *name, uint32_t len, zval *value);
 
+int slim_isset_property_array(zval *object, const char *property, uint32_t property_length, const zval *index);
 
 #endif

@@ -2,6 +2,7 @@
 #include "app.h"
 #include "container.h"
 #include "router.h"
+#include "router/exception.h"
 #include "http/response.h"
 #include "http/responseinterface.h"
 
@@ -11,6 +12,10 @@
 #include "kernel/fcall.h"
 #include "kernel/string.h"
 #include "kernel/operators.h"
+#include "kernel/array.h"
+#include "kernel/object.h"
+#include "kernel/concat.h"
+#include "kernel/exception.h"
 #include "interned-strings.h"
 
 
@@ -64,6 +69,7 @@ PHP_METHOD(Slim_App, run)
 {
     zval http_method = {}, uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
     zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
+    zval controller_name = {}, action_name = {}, has_service = {}, exception_message = {}, call_object = {}, handler = {};
 
 
     ZVAL_STR(&service, IS(request));
@@ -85,7 +91,29 @@ PHP_METHOD(Slim_App, run)
         }
     } else if (Z_TYPE(callable) == IS_STRING) {
         slim_fast_explode_str(&parts, SL("::"), &callable);
-        SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &parts, NULL);
+        // @TODO 判断下小于2返回异常
+        slim_array_fetch_long(&controller_name, &parts, 0, PH_NOISY|PH_READONLY);
+        slim_array_fetch_long(&action_name, &parts, 1, PH_NOISY|PH_READONLY);
+
+        SLIM_CALL_SELF(&has_service, "has", &controller_name);
+        if (!zend_is_true(&has_service)) {
+            //assert(Z_TYPE(controller_name) == IS_STRING);
+            ZVAL_BOOL(&has_service, (slim_class_exists(&controller_name, 1) != NULL) ? 1 : 0);
+        }
+
+        if (!zend_is_true(&has_service)) {
+            SLIM_CONCAT_VS(&exception_message, &controller_name, " handler class cannot be loaded");
+            SLIM_THROW_EXCEPTION_ZVAL(slim_router_route_exception_ce, &exception_message);
+        }
+
+        SLIM_CALL_SELF(&handler, "getshared", &controller_name);
+
+        array_init_size(&call_object, 2);
+        slim_array_append(&call_object, &handler, PH_COPY);
+        slim_array_append(&call_object, &action_name, PH_COPY);
+
+        SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &call_object, NULL);
+        //SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &parts, NULL);
     }
 
     if (Z_TYPE(possible_response) == IS_OBJECT && instanceof_function_ex(Z_OBJCE(possible_response), slim_http_responseinterface_ce, 1)) {

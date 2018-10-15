@@ -604,3 +604,15 @@ void slim_get_ns_class(zval *result, const zval *object, int lower)
 	}
 
 }
+
+int slim_isset_property_array(zval *object, const char *property, uint32_t property_length, const zval *index)
+{
+    zval tmp = {};
+
+    if (Z_TYPE_P(object) == IS_OBJECT) {
+        slim_read_property(&tmp, object, property, property_length, PH_NOISY | PH_READONLY);
+        return slim_array_isset(&tmp, index);
+    }
+
+    return 0;
+}

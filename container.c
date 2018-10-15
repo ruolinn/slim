@@ -12,12 +12,14 @@ PHP_METHOD(Slim_Container, set);
 PHP_METHOD(Slim_Container, get);
 PHP_METHOD(Slim_Container, setShared);
 PHP_METHOD(Slim_Container, getShared);
+PHP_METHOD(Slim_Container, has);
 
 static const zend_function_entry slim_container_method_entry[] = {
     PHP_ME(Slim_Container, set, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Container, get, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Container, setShared, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Container, getShared, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_Container, has, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 
@@ -70,10 +72,12 @@ PHP_METHOD(Slim_Container, get)
             if (FAILURE == slim_create_instance_params_ce(return_value, ce, parameters)) {
                 return;
             }
+        } else {
+            zend_throw_exception_ex(slim_container_exception_ce, 0, "Service '%s' was not found in the container", Z_STRVAL_P(name));
         }
-
-        zend_throw_exception_ex(slim_container_exception_ce, 0, "Service '%s' was not found in the container", Z_STRVAL_P(name));
     }
+
+    return;
 }
 
 PHP_METHOD(Slim_Container, setShared)
@@ -110,3 +114,15 @@ PHP_METHOD(Slim_Container, getShared)
     }
 }
 
+PHP_METHOD(Slim_Container, has)
+{
+    zval *name;
+
+    slim_fetch_params(0, 1, 0, &name);
+
+    if (slim_isset_property_array(getThis(), SL("_services"), name)) {
+        RETURN_TRUE;
+    }
+
+    RETURN_FALSE;
+}

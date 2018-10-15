@@ -2,8 +2,8 @@
 #include "kernel/fcall.h"
 #include "kernel/main.h"
 
-void slim_throw_exception_format(zend_class_entry *ce, const char *format, ...) {
-
+void slim_throw_exception_format(zend_class_entry *ce, const char *format, ...)
+{
     zval object = {}, msg = {};
     int len;
     char *buffer;
@@ -24,7 +24,16 @@ void slim_throw_exception_format(zend_class_entry *ce, const char *format, ...) 
 }
 
 
-void slim_throw_exception_string(zend_class_entry *ce, const char *message){
-
+void slim_throw_exception_string(zend_class_entry *ce, const char *message)
+{
     zend_throw_exception_ex(ce, 0, "%s", message);
+}
+
+void slim_throw_exception_zval(zend_class_entry *ce, zval *message)
+{
+	zval object = {};
+	object_init_ex(&object, ce);
+
+	SLIM_CALL_METHOD(NULL, &object, "__construct", message);
+	zend_throw_exception_object(&object);
 }
