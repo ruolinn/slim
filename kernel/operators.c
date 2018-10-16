@@ -255,3 +255,18 @@ int slim_is_equal(zval *op1, zval *op2)
     is_equal_function(&result, op1, op2);
     return Z_TYPE(result) == IS_TRUE ? 1 : 0;
 }
+
+int slim_is_equal_object(zval *obj1, zval *obj2)
+{
+    zend_string *md5str;
+    zend_string *md5str2;
+
+    if (Z_TYPE_P(obj1) != IS_OBJECT && Z_TYPE_P(obj1) != IS_OBJECT) {
+        return 0;
+    }
+
+    md5str = php_spl_object_hash(obj1);
+    md5str2 = php_spl_object_hash(obj2);
+
+    return zend_string_equals(md5str, md5str2);
+}

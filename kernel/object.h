@@ -9,6 +9,7 @@ void slim_get_ns_class(zval *result, const zval *object, int lower);
 
 zend_class_entry *slim_class_exists(const zval *class_name, int autoload);
 zend_class_entry *slim_class_exists_ex(const zval *class_name, int autoload);
+zend_class_entry *slim_class_str_exists(const char *class_name, uint32_t class_len, int autoload);
 
 static inline zend_class_entry *slim_lookup_class_ce(zend_class_entry *ce, const char *property_name, uint32_t property_length) {
 
@@ -46,11 +47,16 @@ int slim_property_exists(zval *object, const char *property_name, uint32_t prope
 
 int slim_clone(zval *destination, zval *obj);
 
+int slim_method_exists(const zval *object, const zval *method_name);
+int slim_method_exists_ex(const zval *object, const char *method_name, uint32_t method_len);
+
 int slim_read_static_property(zval *return_value, const char *class_name, uint32_t class_length, const char *property_name, uint32_t property_length, int flags);
 int slim_read_static_property_ce(zval *return_value, zend_class_entry *ce, const char *property, uint32_t len, int flags);
 
 int slim_update_static_property_ce(zend_class_entry *ce, const char *name, uint32_t len, zval *value);
 
 int slim_isset_property_array(zval *object, const char *property, uint32_t property_length, const zval *index);
+
+int slim_instance_of_ev(const zval *object, const zend_class_entry *ce);
 
 #endif

@@ -44,5 +44,6 @@ int slim_compare_strict_double(zval *op1, double op2);
 int slim_compare_strict_bool(zval *op1, zend_bool op2);
 
 int slim_is_equal(zval *op1, zval *op2);
+int slim_is_equal_object(zval *obj1, zval *obj2);
 
 #endif

@@ -101,3 +101,16 @@ int slim_read_global_str(zval *return_value, const char *global, unsigned int gl
 
     return 0;
 }
+
+int slim_is_callable(zval *var)
+{
+    char *error = NULL;
+    zend_bool retval;
+
+    retval = zend_is_callable_ex(var, NULL, 0, NULL, NULL, &error);
+    if (error) {
+        efree(error);
+    }
+
+    return (int) retval;
+}

@@ -87,6 +87,12 @@ http/response/headers.c \
 http/response.c \
 http/response/exception.c \
 http/responseinterface.c \
+events/exception.c \
+events/managerinterface.c \
+events/manager.c \
+events/listener.c \
+events/eventinterface.c \
+events/event.c \
 loader.c"
 
   PHP_NEW_EXTENSION(slim, $slim_sources, $ext_shared)

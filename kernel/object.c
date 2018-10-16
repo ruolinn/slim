@@ -616,3 +616,75 @@ int slim_isset_property_array(zval *object, const char *property, uint32_t prope
 
     return 0;
 }
+
+int slim_instance_of_ev(const zval *object, const zend_class_entry *ce)
+{
+    if (Z_TYPE_P(object) != IS_OBJECT) {
+        php_error_docref(NULL, E_WARNING, "instanceof expects an object instance");
+        return 0;
+    }
+
+    return instanceof_function(Z_OBJCE_P(object), ce);
+}
+
+zend_class_entry *slim_class_str_exists(const char *class_name, uint32_t class_len, int autoload)
+{
+    zval name = {};
+    zend_class_entry *ce;
+
+    ZVAL_STRINGL(&name, class_name, class_len);
+    ce = slim_class_exists(&name, autoload);
+    zval_ptr_dtor(&name);
+    return ce;
+}
+
+int slim_method_exists(const zval *object, const zval *method_name)
+{
+
+    zend_string *lcname;
+    zend_class_entry *ce;
+
+    if (likely(Z_TYPE_P(object) == IS_OBJECT)) {
+        ce = Z_OBJCE_P(object);
+    } else if (Z_TYPE_P(object) == IS_STRING) {
+        ce = zend_fetch_class(Z_STR_P(object), ZEND_FETCH_CLASS_DEFAULT);
+    } else {
+        return FAILURE;
+    }
+
+    lcname = zend_string_tolower(Z_STR_P(method_name));
+
+    while (ce) {
+        if (zend_hash_exists(&ce->function_table, lcname)) {
+            zend_string_release(lcname);
+            return SUCCESS;
+        }
+        ce = ce->parent;
+    }
+
+    zend_string_release(lcname);
+
+    return FAILURE;
+}
+
+int slim_method_exists_ex(const zval *object, const char *method_name, uint32_t method_len)
+{
+    zend_class_entry *ce;
+
+    if (likely(Z_TYPE_P(object) == IS_OBJECT)) {
+        ce = Z_OBJCE_P(object);
+    } else if (Z_TYPE_P(object) == IS_STRING) {
+        ce = zend_fetch_class(Z_STR_P(object), ZEND_FETCH_CLASS_DEFAULT);
+    } else {
+        return FAILURE;
+    }
+
+    while (ce) {
+        if (zend_hash_str_exists(&ce->function_table, method_name, method_len)) {
+            return SUCCESS;
+        }
+        ce = ce->parent;
+    }
+
+    return FAILURE;
+}

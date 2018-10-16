@@ -14,6 +14,24 @@ if(!extension_loaded('slim')) {
 	dl('slim.' . PHP_SHLIB_SUFFIX);
 }
 
+//$e = new Slim\Events\Exception('ha');
+//throw $e;
+
+class Handler
+{
+    public function after($event, $source, $data)
+    {
+
+    }
+}
+
+$manager = new Slim\Events\Manager;
+$manager->attach('request', new Handler);
+
+$manager->fire('request:after', array(), ['key' => 'val']);
+
+print_r($manager);exit;
+
 $loader = new Slim\Loader();
 $loader->registerNamespaces([
     'App' => __DIR__.'/src',

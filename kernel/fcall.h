@@ -18,6 +18,11 @@ typedef enum _slim_call_type {
 
 int slim_has_constructor_ce(const zend_class_entry *ce);
 
+static inline int slim_has_constructor(const zval *object)
+{
+    return Z_TYPE_P(object) == IS_OBJECT ? slim_has_constructor_ce(Z_OBJCE_P(object)) : 0;
+}
+
 int slim_call_method_with_params(zval *retval, zval *object, zend_class_entry *ce, slim_call_type type, const char *method_name, uint method_len, uint param_count, zval *params[]);
 int slim_call_user_func_array(zval *retval, zval *handler, zval *params);
 

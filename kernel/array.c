@@ -432,3 +432,23 @@ int ZEND_FASTCALL slim_array_unset_str(zval *arr, const char *index, uint index_
     return zend_hash_str_del(Z_ARRVAL_P(arr), index, index_length);
 }
 
+void slim_array_keys(zval *return_value, zval *arr)
+{
+    zend_string *str_key;
+    ulong idx;
+
+    if (likely(Z_TYPE_P(arr) == IS_ARRAY)) {
+        array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(arr)));
+
+        ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(arr), idx, str_key) {
+            zval key = {};
+            if (str_key) {
+                ZVAL_STR(&key, str_key);
+            } else {
+                ZVAL_LONG(&key, idx);
+            }
+            Z_TRY_ADDREF(key);
+            zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &key);
+        } ZEND_HASH_FOREACH_END();
+    }
+}

@@ -98,6 +98,7 @@ PHP_MINIT_FUNCTION(slim)
 	REGISTER_INI_ENTRIES();
 	*/
 
+    SLIM_INIT(Slim_Exception);
     SLIM_INIT(Slim_Container);
     SLIM_INIT(Slim_Container_Service);
     SLIM_INIT(Slim_Container_Exception);
@@ -110,8 +111,14 @@ PHP_MINIT_FUNCTION(slim)
     SLIM_INIT(Slim_Http_ResponseInterface);
     SLIM_INIT(Slim_Http_Response_Headers);
     SLIM_INIT(Slim_Http_Response);
-    SLIM_INIT(Slim_Http_Response_Exception)
-    SLIM_INIT(Slim_Exception);
+    SLIM_INIT(Slim_Http_Response_Exception);
+    SLIM_INIT(Slim_Events_Exception);
+    SLIM_INIT(Slim_Events_ManagerInterface);
+    SLIM_INIT(Slim_Events_Manager);
+    SLIM_INIT(Slim_Events_Listener);
+    SLIM_INIT(Slim_Events_EventInterface);
+    SLIM_INIT(Slim_Events_Event);
+
 
 	return SUCCESS;
 }

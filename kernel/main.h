@@ -41,6 +41,8 @@
 #define SLIM_ENSURE_IS_OBJECT(pzv)    convert_to_object_ex(pzv)
 #define SLIM_ENSURE_IS_NULL(pzv)      convert_to_null_ex(pzv)
 
+int slim_is_callable(zval *var);
+
 zend_class_entry *slim_register_internal_interface_ex(zend_class_entry *orig_ce, zend_class_entry *parent_ce);
 
 int slim_read_global_str(zval *return_value, const char *global, unsigned int global_length);
@@ -58,6 +60,20 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
         ZVAL_NULL(&slim_memory_entry); \
     }
 
+#define SLIM_VERIFY_INTERFACE_EX(instance, interface_ce, exception_ce) \
+    if (Z_TYPE_P(instance) != IS_OBJECT) {                              \
+        zend_throw_exception_ex(exception_ce, 0, "Unexpected value type: expected object implementing %s, %s given", interface_ce->name->val, zend_zval_type_name(instance)); \
+        return;                                                         \
+    } else if (!instanceof_function_ex(Z_OBJCE_P(instance), interface_ce, 1)) { \
+        zend_throw_exception_ex(exception_ce, 0, "Unexpected value type: expected object implementing %s, object of type %s given", interface_ce->name->val, Z_OBJCE_P(instance)->name->val); \
+        return;                                                         \
+    }
+
+#define RETURN_NCTOR(var) {                     \
+        RETVAL_ZVAL(var, 0, 0);                 \
+    }                                           \
+        return;
+
 #define RETURN_EMPTY_ARRAY() array_init(return_value); return;
 
 #define SLIM_REGISTER_INTERFACE(ns, classname, name, methods)        \
@@ -71,8 +87,8 @@ int slim_fetch_parameters(int num_args, int required_args, int optional_args, ..
     {                                                                   \
         zend_class_entry ce;                                            \
         INIT_NS_CLASS_ENTRY(ce, #ns, #classname, methods);              \
-        slim_ ##lcname## _ce = phalcon_register_internal_interface_ex(&ce, parent_ce); \
-        if (!phalcon_ ##lcname## _ce) {                                 \
+        slim_ ##lcname## _ce = slim_register_internal_interface_ex(&ce, parent_ce); \
+        if (!slim_ ##lcname## _ce) {                                 \
             fprintf(stderr, "Can't register interface %s with parent %s\n", ZEND_NS_NAME(#ns, #classname), (parent_ce ? parent_ce->name->val : "(null)")); \
             return FAILURE;                                             \
         }                                                               \

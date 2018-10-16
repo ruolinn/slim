@@ -49,4 +49,6 @@ void slim_fast_array_merge(zval *return_value, zval *array1, zval *array2);
 int slim_array_update(zval *arr, const zval *index, zval *value, int flags);
 int slim_array_update_hash(HashTable *ht, const zval *index, zval *value, int flags);
 
+void slim_array_keys(zval *return_value, zval *arr);
+
 #endif
