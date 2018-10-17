@@ -25,22 +25,12 @@ class Handler
     }
 }
 
-$manager = new Slim\Events\Manager;
-$manager->attach('request', new Handler);
-
-$manager->fire('request:after', array(), ['key' => 'val']);
-
-print_r($manager);exit;
-
 $loader = new Slim\Loader();
 $loader->registerNamespaces([
     'App' => __DIR__.'/src',
 ]);
 $loader->register();
 
-
-$c = new App\Http\HomeController;
-print_r($c);exit;
 
 //$request = new Slim\Http\Request();
 //var_dump($request->getPost());exit;
@@ -103,7 +93,32 @@ $router->add('POST', '/posts', function(){});
 print_r($router);exit;
 */
 
-$app = new Slim\App;//print_r(get_parent_class($app));exit;
+class HttpMiddleware
+{
+    public function boot($event, $data)
+    {
+        //$event->stop();
+        //print_r(__FUNCTION__);
+        return false;
+    }
+}
+
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$app = new Slim\App;
+
+$app->middleware(new HttpMiddleware);
+$app->middleware(function($event){
+    //echo 'closure';
+    return false;
+});
+
+
+//print_r($app);exit;
+//print_r($app);exit;
+
+//$events = $app->getShared('events');
+
+//print_r($events);exit;
 
 $router = $app->getShared('router');
 
@@ -132,6 +147,6 @@ $_SERVER['REQUEST_URI'] = '/home/2019/title?name=wangxiaoguang';
 //var_dump($route->isMethod("GET"));exit;
 //var_dump($route->isMethod("POST"));exit;
 
-print_r($router);exit;
+//print_r($router);exit;
 
 $app->run();

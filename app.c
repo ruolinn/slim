@@ -24,11 +24,13 @@ zend_class_entry *slim_app_ce;
 
 PHP_METHOD(Slim_App, __construct);
 PHP_METHOD(Slim_App, bootstrapContainer);
+PHP_METHOD(Slim_App, middleware);
 PHP_METHOD(Slim_App, run);
 
 static const zend_function_entry slim_app_method_entry[] = {
     PHP_ME(Slim_App, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
     PHP_ME(Slim_App, bootstrapContainer, NULL, ZEND_ACC_PROTECTED)
+    PHP_ME(Slim_App, middleware, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_App, run, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
@@ -36,6 +38,8 @@ static const zend_function_entry slim_app_method_entry[] = {
 SLIM_INIT_CLASS(Slim_App)
 {
     SLIM_REGISTER_CLASS_EX(Slim, App, app, slim_container_ce, slim_app_method_entry, 0);
+
+    zend_declare_property_null(slim_app_ce, SL("_middleware"), ZEND_ACC_PROTECTED);
 
     return SUCCESS;
 }
@@ -54,15 +58,36 @@ PHP_METHOD(Slim_App, bootstrapContainer)
     SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
     zval_ptr_dtor(&definition);
 
-	ZVAL_STR(&service, IS(request));
-	ZVAL_STRING(&definition, "Slim\\Http\\Request");
-	SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
-	zval_ptr_dtor(&definition);
+    ZVAL_STR(&service, IS(request));
+    ZVAL_STRING(&definition, "Slim\\Http\\Request");
+    SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
+    zval_ptr_dtor(&definition);
 
     ZVAL_STR(&service, IS(response));
     ZVAL_STRING(&definition, "Slim\\Http\\Response");
     SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
     zval_ptr_dtor(&definition);
+
+    ZVAL_STR(&service, IS(events));
+    ZVAL_STRING(&definition, "Slim\\Events\\Manager");
+    SLIM_CALL_SELF(NULL, "set", &service, &definition, &SLIM_G(z_true));
+    zval_ptr_dtor(&definition);
+}
+
+PHP_METHOD(Slim_App, middleware)
+{
+    zval *listener, events = {}, service = {}, event_name = {};
+
+    slim_fetch_params(0, 1, 0, &listener);
+
+    ZVAL_STR(&service, IS(events));
+    SLIM_CALL_SELF(&events, "getshared", &service);
+
+    ZVAL_STRING(&event_name, "app:boot");
+
+    SLIM_CALL_METHOD(NULL, &events, "attach", &event_name, listener);
+
+    slim_update_property_array_append(getThis(), SL("_middleware"), listener);
 }
 
 PHP_METHOD(Slim_App, run)
@@ -70,7 +95,17 @@ PHP_METHOD(Slim_App, run)
     zval http_method = {}, uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
     zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
     zval controller_name = {}, action_name = {}, has_service = {}, exception_message = {}, call_object = {}, handler = {};
+    zval event_name = {}, events = {}, status = {};
 
+    ZVAL_STRING(&event_name, "app:boot");
+    ZVAL_STR(&service, IS(events));
+    SLIM_CALL_SELF(&events, "getshared", &service);
+    SLIM_CALL_METHOD(&status, &events, "fire", &event_name, getThis());
+
+    if (SLIM_IS_FALSE(&status)) {
+        RETURN_FALSE;
+    }
+    zval_ptr_dtor(&status);
 
     ZVAL_STR(&service, IS(request));
     SLIM_CALL_SELF(&request, "getshared", &service);
