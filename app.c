@@ -18,19 +18,25 @@
 #include "kernel/exception.h"
 #include "interned-strings.h"
 
-
+#include "kernel/debug.h"
 
 zend_class_entry *slim_app_ce;
 
 PHP_METHOD(Slim_App, __construct);
 PHP_METHOD(Slim_App, bootstrapContainer);
 PHP_METHOD(Slim_App, middleware);
+PHP_METHOD(Slim_App, fireMiddleware);
+PHP_METHOD(Slim_App, fireRouteMiddleware);
+PHP_METHOD(Slim_App, routeMiddleware);
 PHP_METHOD(Slim_App, run);
 
 static const zend_function_entry slim_app_method_entry[] = {
     PHP_ME(Slim_App, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
     PHP_ME(Slim_App, bootstrapContainer, NULL, ZEND_ACC_PROTECTED)
     PHP_ME(Slim_App, middleware, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_App, fireMiddleware, NULL, ZEND_ACC_PROTECTED)
+    PHP_ME(Slim_App, routeMiddleware, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_App, fireRouteMiddleware, NULL, ZEND_ACC_PROTECTED)
     PHP_ME(Slim_App, run, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
@@ -40,6 +46,7 @@ SLIM_INIT_CLASS(Slim_App)
     SLIM_REGISTER_CLASS_EX(Slim, App, app, slim_container_ce, slim_app_method_entry, 0);
 
     zend_declare_property_null(slim_app_ce, SL("_middleware"), ZEND_ACC_PROTECTED);
+    zend_declare_property_null(slim_app_ce, SL("_routeMiddleware"), ZEND_ACC_PROTECTED);
 
     return SUCCESS;
 }
@@ -76,18 +83,108 @@ PHP_METHOD(Slim_App, bootstrapContainer)
 
 PHP_METHOD(Slim_App, middleware)
 {
-    zval *listener, events = {}, service = {}, event_name = {};
+    zval *listeners, middleware = {}, merge_listeners = {}, _listeners, _middleware;
 
-    slim_fetch_params(0, 1, 0, &listener);
+    slim_fetch_params(0, 1, 0, &listeners);
 
-    ZVAL_STR(&service, IS(events));
-    SLIM_CALL_SELF(&events, "getshared", &service);
+    if (Z_TYPE_P(listeners) != IS_ARRAY) {
+        array_init(&_listeners);
+        slim_array_append(&_listeners, listeners, PH_COPY);
+    } else {
+        ZVAL_COPY(&_listeners, listeners);
+    }
 
-    ZVAL_STRING(&event_name, "app:boot");
+    slim_read_property(&middleware, getThis(), SL("_middleware"), PH_COPY);
+    if (Z_TYPE(middleware) != IS_ARRAY) {
+        array_init(&middleware);
+    }
 
-    SLIM_CALL_METHOD(NULL, &events, "attach", &event_name, listener);
+    slim_fast_array_merge(&merge_listeners, &middleware, &_listeners);
 
-    slim_update_property_array_append(getThis(), SL("_middleware"), listener);
+    SLIM_CALL_FUNCTION(&_middleware, "array_unique", &merge_listeners);
+
+    slim_update_property(getThis(), SL("_middleware"), &_middleware);
+}
+
+PHP_METHOD(Slim_App, fireMiddleware)
+{
+    zval *app, listeners = {}, *listener, status = {};
+
+    slim_fetch_params(0, 1, 0, &app);
+
+    slim_read_property(&listeners, getThis(), SL("_middleware"), PH_COPY);
+
+    if (unlikely(Z_TYPE(listeners) != IS_ARRAY)) {
+        return;
+    }
+
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL(listeners), listener) {
+        zval handler = {};
+        if (Z_TYPE_P(listener) == IS_STRING) {
+            SLIM_CALL_SELF(&handler, "get", listener);
+
+            if (slim_method_exists_ex(&handler, SL("handle")) == SUCCESS) {
+                SLIM_CALL_METHOD(&status, &handler, "handle");
+
+                if (SLIM_IS_FALSE(&status)) {
+                    break;
+                }
+
+                zval_ptr_dtor(&handler);
+            }
+        }
+
+
+    } ZEND_HASH_FOREACH_END();
+
+    RETURN_NCTOR(&status);
+}
+
+PHP_METHOD(Slim_App, routeMiddleware)
+{
+    zval *listeners, route_middleware, merge_route_middleware;
+
+    slim_fetch_params(0, 1, 0, &listeners);
+
+    slim_read_property(&route_middleware, getThis(), SL("_routeMiddleware"), PH_COPY);
+    if (Z_TYPE(route_middleware) != IS_ARRAY) {
+        array_init(&route_middleware);
+    }
+
+    slim_fast_array_merge(&merge_route_middleware, &route_middleware, listeners);
+
+    slim_update_property(getThis(), SL("_routeMiddleware"), &merge_route_middleware);
+}
+
+PHP_METHOD(Slim_App, fireRouteMiddleware)
+{
+    zval *names, *name, route_listeners, listener = {}, status = {};
+
+    slim_fetch_params(0, 1, 0, &names);
+
+    slim_read_property(&route_listeners, getThis(), SL("_routeMiddleware"), PH_COPY);
+
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(names), name) {
+        zval listener = {}, handler = {};
+        if (slim_array_isset_fetch(&listener, &route_listeners, name, PH_READONLY)) {
+            if (Z_TYPE(listener) == IS_STRING) {
+                SLIM_CALL_SELF(&handler, "get", &listener);
+
+                if (slim_method_exists_ex(&handler, SL("handle")) == SUCCESS) {
+                    SLIM_CALL_METHOD(&status, &handler, "handle");
+
+                    if (SLIM_IS_FALSE(&status)) {
+                        break;
+                    }
+                }
+
+                zval_ptr_dtor(&handler);
+            }
+        }
+
+    } ZEND_HASH_FOREACH_END();
+
+    RETURN_NCTOR(&status);
 }
 
 PHP_METHOD(Slim_App, run)
@@ -95,12 +192,9 @@ PHP_METHOD(Slim_App, run)
     zval http_method = {}, uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
     zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
     zval controller_name = {}, action_name = {}, has_service = {}, exception_message = {}, call_object = {}, handler = {};
-    zval event_name = {}, events = {}, status = {};
+    zval status = {}, middleware;
 
-    ZVAL_STRING(&event_name, "app:boot");
-    ZVAL_STR(&service, IS(events));
-    SLIM_CALL_SELF(&events, "getshared", &service);
-    SLIM_CALL_METHOD(&status, &events, "fire", &event_name, getThis());
+    SLIM_CALL_METHOD(&status, getThis(), "firemiddleware", getThis());
 
     if (SLIM_IS_FALSE(&status)) {
         RETURN_FALSE;
@@ -118,7 +212,10 @@ PHP_METHOD(Slim_App, run)
     SLIM_CALL_METHOD(NULL, &router, "dispatch", &http_method, &uri);
 
     SLIM_CALL_METHOD(&route, &router, "getmatchedroute");
-    SLIM_CALL_METHOD(&callable, &route, "getCallable");
+    SLIM_CALL_METHOD(&callable, &route, "getcallable");
+    SLIM_CALL_METHOD(&middleware, &route, "getmiddleware");
+
+    SLIM_CALL_METHOD(&status, getThis(), "fireroutemiddleware", &middleware);
 
     if (Z_TYPE(callable) == IS_OBJECT) {
         if (instanceof_function(Z_OBJCE(callable), zend_ce_closure)) {
@@ -132,7 +229,6 @@ PHP_METHOD(Slim_App, run)
 
         SLIM_CALL_SELF(&has_service, "has", &controller_name);
         if (!zend_is_true(&has_service)) {
-            //assert(Z_TYPE(controller_name) == IS_STRING);
             ZVAL_BOOL(&has_service, (slim_class_exists(&controller_name, 1) != NULL) ? 1 : 0);
         }
 

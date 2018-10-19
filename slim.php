@@ -95,10 +95,17 @@ print_r($router);exit;
 
 class HttpMiddleware
 {
-    public function boot($event, $data)
+    public function handle()
     {
-        //$event->stop();
-        //print_r(__FUNCTION__);
+        echo 'api';
+    }
+}
+
+class ResponseMiddleware
+{
+    public function handle()
+    {
+        echo  'web';
         return false;
     }
 }
@@ -106,11 +113,19 @@ class HttpMiddleware
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $app = new Slim\App;
 
-$app->middleware(new HttpMiddleware);
-$app->middleware(function($event){
-    //echo 'closure';
-    return false;
-});
+//$app->middleware([HttpMiddleware::class]);
+//$app->middleware(ResponseMiddleware::class);
+
+
+
+$app->routeMiddleware([
+    'api' => HttpMiddleware::class,
+    'web' => ResponseMiddleware::class,
+]);
+
+//$app->routeMiddleware('api', HttpMiddleware::class);
+
+//print_r($app);exit;
 
 
 //print_r($app);exit;
@@ -122,7 +137,7 @@ $app->middleware(function($event){
 
 $router = $app->getShared('router');
 
-$router->add(['GET', 'POST'], "/home/{year:[0-9]+}/{title:[a-z\-]+}", 'HomeController::index');
+$router->add(['GET', 'POST'], "/home/{year:[0-9]+}/{title:[a-z\-]+}", 'HomeController::index')->middleware(['api']);
 
 /*
 $router->add(['GET'], '/home', function() {
@@ -140,7 +155,7 @@ $_SERVER['REQUEST_URI'] = '/home/2019/title?name=wangxiaoguang';
 //$router->dispatch('GET', '/home/2019/title');
 
 //$route = $router->getMatchedRoute();
-
+//print_R($route);exit;
 //print_r($route->getPaths());exit;
 //print_r($router->getRoutes());exit;
 //print_r($route->prepare("App\Http\HomeController"));exit;

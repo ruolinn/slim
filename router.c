@@ -97,8 +97,11 @@ PHP_METHOD(Slim_Router, dispatch)
 
     ZVAL_FALSE(&route_found);
 
+    slim_update_property_bool(getThis(), SL("_wasMatched"), 0);
+    slim_update_property_null(getThis(), SL("_matchedRoute"));
+
     slim_read_property(&routes, getThis(), SL("_routes"), PH_NOISY|PH_READONLY);
-    TRACE("match route start");
+
     ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(routes), route) {
         zval pattern = {}, match_method = {}, case_pattern = {}, *position, paths = {};;
 
@@ -111,7 +114,6 @@ PHP_METHOD(Slim_Router, dispatch)
 
         ZVAL_NULL(&matches);
         if (Z_TYPE(pattern) == IS_STRING && Z_STRLEN(pattern) > 3 && Z_STRVAL(pattern)[1] == '^') {
-            TRACE("pattern is regx");
             if (zend_is_true(&case_sensitive)) {
                 SLIM_CONCAT_VS(&case_pattern, &pattern, "i");
                 slim_preg_match(&route_found, &case_pattern, &handled_uri, &matches, 0, 0);

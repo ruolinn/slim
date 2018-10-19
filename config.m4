@@ -75,6 +75,7 @@ kernel/framework/router.c \
 kernel/memory.c \
 kernel/file.c \
 kernel/require.c \
+kernel/debug.c \
 app.c \
 container.c \
 container/service.c \

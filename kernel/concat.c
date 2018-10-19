@@ -132,3 +132,30 @@ void slim_concat_vvsv(zval *result, zval *op1, zval *op2, const char *op3, uint3
         ZVAL_NULL(result);
     }
 }
+
+void slim_concat_self_str(zval *left, const char *right, int right_length)
+{
+    zval zright = {}, tmp = {};
+    ZVAL_STRINGL(&zright, right, right_length);
+
+    concat_function(&tmp, left, &zright);
+    ZVAL_COPY_VALUE(left, &tmp);
+    zval_ptr_dtor(&zright);
+}
+
+void slim_concat_ss(zval *result, const char *op1, uint32_t op1_len, const char *op2, uint32_t op2_len, int self_var)
+{
+    smart_str implstr = {0};
+    if (self_var) {
+        slim_append_printable_zval(&implstr, result);
+    }
+    slim_smart_str_appendl(&implstr, op1, op1_len);
+    slim_smart_str_appendl(&implstr, op2, op2_len);
+    smart_str_0(&implstr);
+    if (implstr.s) {
+        ZVAL_NEW_STR(result, implstr.s);
+    } else {
+        smart_str_free(&implstr);
+        ZVAL_NULL(result);
+    }
+}

@@ -394,3 +394,29 @@ int slim_start_with(const zval *str, const zval *compared, zval *case_sensitive)
 
     return 1;
 }
+
+void slim_fast_strtolower(zval *return_value, zval *str)
+{
+    zval copy;
+    int use_copy = 0;
+    char *lower_str;
+    unsigned int length;
+
+    if (Z_TYPE_P(str) != IS_STRING) {
+        use_copy = zend_make_printable_zval(str, &copy);
+        if (use_copy) {
+            str = &copy;
+        }
+    }
+
+    length = Z_STRLEN_P(str);
+    lower_str = estrndup(Z_STRVAL_P(str), length);
+    php_strtolower(lower_str, length);
+
+    if (use_copy) {
+        zval_dtor(str);
+    }
+
+    ZVAL_STRINGL(return_value, lower_str, length);
+    efree(lower_str);
+}

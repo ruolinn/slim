@@ -6,6 +6,7 @@
 #include "kernel/string.h"
 #include "kernel/framework/router.h"
 #include "kernel/concat.h"
+#include "kernel/array.h"
 
 zend_class_entry *slim_router_route_ce;
 
@@ -17,6 +18,8 @@ PHP_METHOD(Slim_Router_Route, isMethod);
 PHP_METHOD(Slim_Router_Route, prepare);
 PHP_METHOD(Slim_Router_Route, compilePattern);
 PHP_METHOD(Slim_Router_Route, getPaths);
+PHP_METHOD(Slim_Router_Route, middleware);
+PHP_METHOD(Slim_Router_Route, getMiddleware);
 
 static const zend_function_entry slim_router_route_method_entry[] = {
     PHP_ME(Slim_Router_Route, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
@@ -27,6 +30,8 @@ static const zend_function_entry slim_router_route_method_entry[] = {
     PHP_ME(Slim_Router_Route, prepare, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Router_Route, compilePattern, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(Slim_Router_Route, getPaths, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_Router_Route, middleware, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(Slim_Router_Route, getMiddleware, NULL, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 
@@ -41,6 +46,7 @@ SLIM_INIT_CLASS(Slim_Router_Route)
     zend_declare_property_null(slim_router_route_ce, SL("_callable"), ZEND_ACC_PROTECTED);
     zend_declare_property_long(slim_router_route_ce, SL("_uniqueId"), 0, ZEND_ACC_STATIC|ZEND_ACC_PROTECTED);
     zend_declare_property_null(slim_router_route_ce, SL("_paths"), ZEND_ACC_PROTECTED);
+    zend_declare_property_null(slim_router_route_ce, SL("_middleware"), ZEND_ACC_PROTECTED);
 
     return SUCCESS;
 }
@@ -170,4 +176,26 @@ PHP_METHOD(Slim_Router_Route, compilePattern)
 PHP_METHOD(Slim_Router_Route, getPaths)
 {
     RETURN_MEMBER(getThis(), "_paths");
+}
+
+PHP_METHOD(Slim_Router_Route, middleware)
+{
+    zval *items, middleware = {}, _middleware = {}, merge_middleware = {};
+
+    slim_fetch_params(0, 1, 0, &items);
+
+    slim_read_property(&middleware, getThis(), SL("_middleware"), PH_COPY);
+    if (Z_TYPE(middleware) == IS_NULL) {
+        array_init(&middleware);
+    }
+
+    slim_fast_array_merge(&merge_middleware, &middleware, items);
+    SLIM_CALL_FUNCTION(&_middleware, "array_unique", &merge_middleware);
+
+    slim_update_property(getThis(), SL("_middleware"), &_middleware);
+}
+
+PHP_METHOD(Slim_Router_Route, getMiddleware)
+{
+    RETURN_MEMBER(getThis(), "_middleware");
 }
