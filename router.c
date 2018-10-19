@@ -9,6 +9,7 @@
 #include "kernel/operators.h"
 #include "kernel/exception.h"
 #include "kernel/concat.h"
+#include "kernel/debug.h"
 
 //#include <main/SAPI.h>
 
@@ -154,52 +155,13 @@ PHP_METHOD(Slim_Router, dispatch)
     } ZEND_HASH_FOREACH_END();
 
     slim_update_property_bool(getThis(), SL("_wasMatched"), zend_is_true(&route_found));
+    SLIM_CALL_METHOD(NULL, getThis(), "setparams", &parts);
 
     if (!zend_is_true(&route_found)) {
         slim_update_property_null(getThis(), SL("_matches"));
         slim_update_property_null(getThis(), SL("_matchedRoute"));
         SLIM_THROW_EXCEPTION_STR(slim_router_route_exception_ce, "Not found");
         RETURN_FALSE;
-    }
-
-    if (zend_is_true(&route_found)) {
-        if (slim_array_isset_fetch_str(&params_str, &parts, SL("params"), PH_READONLY)) {
-            if (Z_TYPE(params_str) == IS_STRING) {
-                if (slim_start_with_str(&params_str, SL("/"))) {
-                    slim_substr(&str_params, &params_str, 1, 0);
-                } else {
-                    slim_substr(&str_params, &params_str, 0, 0);
-                }
-
-                if (zend_is_true(&str_params)) {
-                    zval slash = {};
-                    ZVAL_STRINGL(&slash, "/", 1);
-                    slim_fast_explode(&params, &slash, &str_params);
-                    zval_ptr_dtor(&slash);
-                } else if (!SLIM_IS_EMPTY(&str_params)) {
-                    array_init(&params);
-                    slim_array_append(&params, &str_params, PH_COPY);
-                } else {
-                    array_init(&params);
-                }
-                zval_ptr_dtor(&str_params);
-            } else {
-                array_init(&params);
-            }
-
-            slim_array_unset_str(&parts, SL("params"), 0);
-        } else {
-            array_init(&params);
-        }
-
-        if (zend_hash_num_elements(Z_ARRVAL(params))) {
-            slim_fast_array_merge(&params_merge, &params, &parts);
-        } else {
-            ZVAL_COPY(&params_merge, &parts);
-        }
-
-        zval_ptr_dtor(&params);
-        SLIM_CALL_METHOD(NULL, getThis(), "setparams", &params_merge);
     }
 
     if (zend_is_true(&route_found)) {

@@ -195,7 +195,6 @@ PHP_METHOD(Slim_App, run)
     zval status = {}, middleware;
 
     SLIM_CALL_METHOD(&status, getThis(), "firemiddleware", getThis());
-
     if (SLIM_IS_FALSE(&status)) {
         RETURN_FALSE;
     }
@@ -208,7 +207,6 @@ PHP_METHOD(Slim_App, run)
 
     ZVAL_STR(&service, IS(router));
     SLIM_CALL_SELF(&router, "getshared", &service);
-
     SLIM_CALL_METHOD(NULL, &router, "dispatch", &http_method, &uri);
 
     SLIM_CALL_METHOD(&route, &router, "getmatchedroute");

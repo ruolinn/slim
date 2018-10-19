@@ -127,10 +127,6 @@ $app->routeMiddleware([
 
 //print_r($app);exit;
 
-
-//print_r($app);exit;
-//print_r($app);exit;
-
 //$events = $app->getShared('events');
 
 //print_r($events);exit;
@@ -152,7 +148,7 @@ $router->add(['POST'], '/users', function() {
 //$_SERVER['REQUEST_URI'] = '/users?name=wangxiaoguang';
 $_SERVER['REQUEST_URI'] = '/home/2019/title?name=wangxiaoguang';
 
-//$router->dispatch('GET', '/home/2019/title');
+$router->dispatch('GET', '/home/2019/title');
 
 //$route = $router->getMatchedRoute();
 //print_R($route);exit;
@@ -165,3 +161,4 @@ $_SERVER['REQUEST_URI'] = '/home/2019/title?name=wangxiaoguang';
 //print_r($router);exit;
 
 $app->run();
+print_r($router);
