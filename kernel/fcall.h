@@ -26,6 +26,15 @@ static inline int slim_has_constructor(const zval *object)
 int slim_call_method_with_params(zval *retval, zval *object, zend_class_entry *ce, slim_call_type type, const char *method_name, uint method_len, uint param_count, zval *params[]);
 int slim_call_user_func_array(zval *retval, zval *handler, zval *params);
 
+static inline int slim_call_user_func_array_noex(zval *retval, zval *handler, zval *params)
+{
+    if (zend_is_callable(handler, 0, NULL)) {
+        return slim_call_user_func_array(retval, handler, params);
+    }
+
+    return FAILURE;
+}
+
 static inline int slim_call_method(zval *retval, zval *object, const char *method, uint nparams, zval **params)
 {
     return slim_call_method_with_params(retval, object, Z_OBJCE_P(object), slim_fcall_method, method, strlen(method), nparams, params);

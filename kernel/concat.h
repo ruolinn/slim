@@ -23,6 +23,8 @@
     slim_concat_svs(result, op1, sizeof(op1)-1, op2, op3, sizeof(op3)-1, 0);
 #define SLIM_CONCAT_SVSV(result, op1, op2, op3, op4)                 \
     slim_concat_svsv(result, op1, sizeof(op1)-1, op2, op3, sizeof(op3)-1, op4, 0);
+#define SLIM_CONCAT_SVSVS(result, op1, op2, op3, op4, op5)           \
+    slim_concat_svsvs(result, op1, sizeof(op1)-1, op2, op3, sizeof(op3)-1, op4, op5, sizeof(op5)-1, 0);
 
 void slim_concat_vv(zval *result, zval *op1, zval *op2, int self_var);
 void slim_concat_vvsv(zval *result, zval *op1, zval *op2, const char *op3, uint32_t op3_len, zval *op4, int self_var);
@@ -31,6 +33,7 @@ void slim_concat_sv(zval *result, const char *op1, uint32_t op1_len, zval *op2, 
 void slim_concat_vsv(zval *result, zval *op1, const char *op2, uint32_t op2_len, zval *op3, int self_var);
 void slim_concat_svs(zval *result, const char *op1, uint32_t op1_len, zval *op2, const char *op3, uint32_t op3_len, int self_var);
 void slim_concat_svsv(zval *result, const char *op1, uint32_t op1_len, zval *op2, const char *op3, uint32_t op3_len, zval *op4, int self_var);
+void slim_concat_svsvs(zval *result, const char *op1, uint32_t op1_len, zval *op2, const char *op3, uint32_t op3_len, zval *op4, const char *op5, uint32_t op5_len, int self_var);
 
 void slim_concat_self_str(zval *left, const char *right, int right_length);
 

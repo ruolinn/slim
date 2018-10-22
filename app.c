@@ -190,9 +190,9 @@ PHP_METHOD(Slim_App, fireRouteMiddleware)
 PHP_METHOD(Slim_App, run)
 {
     zval http_method = {}, uri = {}, service = {}, router = {}, request = {}, callable = {}, route = {}, parts = {};
-    zval route_paths, response = {}, possible_response = {}, returned_response = {}, returned_response_sent = {};
+    zval route_paths, response = {}, possible_response = {}, returned_response = {};
     zval controller_name = {}, action_name = {}, has_service = {}, exception_message = {}, call_object = {}, handler = {};
-    zval status = {}, middleware;
+    zval status = {}, middleware, params = {};
 
     SLIM_CALL_METHOD(&status, getThis(), "firemiddleware", getThis());
     if (SLIM_IS_FALSE(&status)) {
@@ -221,7 +221,7 @@ PHP_METHOD(Slim_App, run)
         }
     } else if (Z_TYPE(callable) == IS_STRING) {
         slim_fast_explode_str(&parts, SL("::"), &callable);
-        // @TODO 判断下小于2返回异常
+
         slim_array_fetch_long(&controller_name, &parts, 0, PH_NOISY|PH_READONLY);
         slim_array_fetch_long(&action_name, &parts, 1, PH_NOISY|PH_READONLY);
 
@@ -237,12 +237,18 @@ PHP_METHOD(Slim_App, run)
 
         SLIM_CALL_SELF(&handler, "getshared", &controller_name);
 
+        if (slim_method_exists(&handler, &action_name) == FAILURE) {
+            SLIM_CONCAT_SVSVS(&exception_message, "Method '", &action_name, "' was not found on handler '", &controller_name, "'");
+            SLIM_THROW_EXCEPTION_ZVAL(slim_router_route_exception_ce, &exception_message);
+        }
+
+        SLIM_CALL_METHOD(&params, &router, "getparams");
+
         array_init_size(&call_object, 2);
         slim_array_append(&call_object, &handler, PH_COPY);
         slim_array_append(&call_object, &action_name, PH_COPY);
 
-        SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &call_object, NULL);
-        //SLIM_CALL_USER_FUNC_ARRAY(&possible_response, &parts, NULL);
+        slim_call_user_func_array_noex(&possible_response, &call_object, &params);
     }
 
     if (Z_TYPE(possible_response) == IS_OBJECT && instanceof_function_ex(Z_OBJCE(possible_response), slim_http_responseinterface_ce, 1)) {
@@ -263,9 +269,8 @@ PHP_METHOD(Slim_App, run)
         }
     }
 
-    SLIM_CALL_METHOD(&returned_response_sent, &response, "issent");
+    SLIM_CALL_METHOD(NULL, &response, "sendheaders");
+    SLIM_CALL_METHOD(NULL, &response, "sendcookies");
 
-    if (SLIM_IS_FALSE(&returned_response_sent)) {
-        SLIM_CALL_METHOD(NULL, &response, "send");
-    }
+    SLIM_CALL_METHOD(NULL, &response, "send");
 }
